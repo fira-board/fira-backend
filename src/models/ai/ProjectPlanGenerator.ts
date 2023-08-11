@@ -8,7 +8,7 @@ import { ProjectPlan } from "../ai/ProjectPlanSchema";
 
 
 // TODO: use local .env file.
-dotenv.config({ path: path.join(__dirname, "../.env") });
+dotenv.config({ path: path.join(__dirname, "../../../.env") });
 
 const model = createLanguageModel(process.env);
 const schema = fs.readFileSync(path.join("src/models/ai/", "ProjectPlanSchema.ts"), "utf8");

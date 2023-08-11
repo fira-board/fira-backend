@@ -19,8 +19,9 @@ export const listProjects = async (req: Request, res: Response) => {
 export const createProject = async (req: Request, res: Response) => {
     try {
         let userId = "uuid21312321";
-        if (req.params.empty)
+        if (req.params.empty) {
             res.status(201).send(new Project(req.body).save());
+        }
         else {
             generateProjectPlan(req.body.summary).then(async (projectPlan) => {
 
@@ -47,6 +48,44 @@ export const createProject = async (req: Request, res: Response) => {
                 res.status(201).send(project);
             });
         }
+    } catch (err) {
+        res.status(500).send(err);
+    }
+};
+
+export const listProject = async (req: Request, res: Response) => {
+    try {
+        const project = await Project.findOne({ _id: req.params.id });
+          console.log('Project found');
+          res.json(project);
+    } catch (err) {
+        res.status(500).send(err);
+    }
+};
+
+export const deleteProject = async (req: Request, res: Response) => {
+    try {
+        const deleted = await Project.deleteOne({ _id: req.params.id });
+          console.log('Project deleted successfully');
+          res.json(deleted);
+    } catch (err) {
+        res.status(500).send(err);
+    }
+};
+
+export const updateProject = async (req: Request, res: Response) => {
+    try {
+        const updatedData = {
+            name: req.body.name,
+            description: req.body.description,
+            resources: req.body.resources,
+            epics: req.body.epics,
+            tasks: req.body.tasks,
+            contributors: req.body.contributors,
+        }
+        const updated = await Project.updateOne({ _id: req.params.id }, updatedData);
+          console.log('Project updated successfully');
+          res.json(updated);
     } catch (err) {
         res.status(500).send(err);
     }
