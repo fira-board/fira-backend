@@ -25,15 +25,7 @@ mongoose.connect(MONGO_URI);
 
 app.use(express.json());
 app.use('/projects', projectRoutes);
-app.use('/ai', aiRoutes)
-
-
-function asyncWrapper(fn: Function) {
-    return (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        Promise.resolve(fn(req, res, next)).catch(next);
-    };
-}
-
+app.use('/ai', aiRoutes);
 
 process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
