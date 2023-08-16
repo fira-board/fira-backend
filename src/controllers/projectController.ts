@@ -90,5 +90,3 @@ export const updateProject = async (req: Request, res: Response) => {
         res.status(500).send(err);
     }
 };
-
-// ... You can add more controller functions for update, delete, and add contributors.
