@@ -1,23 +1,26 @@
-FROM node:20.5-alpine
+FROM node:20-alpine
+# Step 2: Set working directory
+WORKDIR /usr/src/app
 
-# update packages
-RUN apk update
-
-# create root application folder
-WORKDIR /app
-
-# copy configs to /app folder
+# Step 3: Copy package files
 COPY package*.json ./
-COPY tsconfig.json ./
-# copy source code to /app/src folder
-COPY src /app/src
 
-# check files list
-RUN ls -a
-
+# Step 4: Install dependencies
 RUN npm install
+
+# If you want to install global packages, you can use:
+RUN npm install -g typescript
+
+# Step 5: Copy source code
+COPY . .
+
+COPY src/.env ./dist/.env
+
+ENV PORT=80
+# Step 6: Compile TypeScript to JavaScript
 RUN npm run build
+EXPOSE 80
 
-EXPOSE 3000
 
-CMD [ "node", "./dist/index.js" ]
+# Step 7: Start the application
+CMD [ "node", "dist/index.js" ]
