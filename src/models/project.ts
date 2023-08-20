@@ -8,6 +8,7 @@ const projectSchema = new mongoose.Schema<IProject>({
         required: true
     },
     description: String,
+    prompt: String,
     resources: [String],
     epics: [String],
     tasks: [Task.schema],

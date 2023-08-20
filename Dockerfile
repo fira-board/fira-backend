@@ -24,3 +24,9 @@ EXPOSE 80
 
 # Step 7: Start the application
 CMD [ "node", "dist/index.js" ]
+
+
+### az login
+### az acr login --name firarepo.azurecr.io
+### docker tag fira-backend:v0.02 firarepo.azurecr.io/fira-backend:v0.02
+### docker push firarepo.azurecr.io/fira-backend:v0.02

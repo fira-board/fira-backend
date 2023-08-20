@@ -12,6 +12,7 @@ export interface ITask {
 export interface IProject {
     name?: string;
     description?: string;
+    prompt?: string;
     resources?: string[];
     epics?: string[];
     tasks?: ITask[];

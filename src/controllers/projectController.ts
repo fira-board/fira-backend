@@ -47,6 +47,7 @@ export const createProject = async (req: Request, res: Response) => {
                 name: projectName, 
                 description: projectDescription, 
                 resources: projectResources, 
+                prompt: req.body.summary,
                 epics: projectEpics, 
                 tasks: projectTasks, 
                 userId: userId, 
