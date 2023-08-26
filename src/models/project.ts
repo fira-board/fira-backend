@@ -1,20 +1,24 @@
-import mongoose from 'mongoose';
-import Task from './task';
+import mongoose, { Schema, Document } from 'mongoose';
 import { IProject } from './types';
 
-const projectSchema = new mongoose.Schema<IProject>({
+interface IProjectModel extends IProject, Document {}
+
+const projectSchema = new Schema<IProjectModel>({
     name: {
         type: String,
         required: true
     },
     description: String,
     prompt: String,
-    resources: [String],
-    epics: [String],
-    tasks: [Task.schema],
-    userId: {type:String, required:true},
-    contributors: [String],
+    resources: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Resource'
+    }],
+    userId: {
+        type: String,
+        required: true
+    },
 });
 
-const Project = mongoose.model('Project', projectSchema);
+const Project = mongoose.model<IProjectModel>('Project', projectSchema);
 export default Project;

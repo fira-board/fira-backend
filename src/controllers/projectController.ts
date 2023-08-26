@@ -1,10 +1,12 @@
 import Project from '../models/project';
 import Task from '../models/task';
+import Epic from '../models/epic';
+import Resource from '../models/resource';
 
 import { generateProjectPlan } from '../models/ai/ProjectPlanGenerator';
 
 import { Request, Response } from 'express';
-import { ITask } from '../models/types';
+import { ITask, IEpic, IResource } from '../models/types';
 
 export const listProjects = async (req: Request, res: Response) => {
     try {
@@ -27,23 +29,45 @@ export const createProject = async (req: Request, res: Response) => {
 
             let projectName = projectPlan?.projectName;
             let projectDescription = projectPlan?.description;
-            let projectResources: string[] = [];
-            let projectEpics: string[] = [];
+            let projectResources: IResource[] = [];
+            let projectEpics: IEpic[] = [];
             let projectTasks: ITask[] = [];
 
-            projectPlan?.resources.forEach((resource) => {
-                let resourceName = resource.name;
-                projectResources.push(resourceName);
-                resource.epics.forEach((epic) => {
-                    let epicName = epic.name;
-                    projectEpics.push(epicName);
-                    epic.tasks.forEach((task) => {
-                        projectTasks.push(new Task({ title: task.title, resource: resourceName, epic: epicName, estimateDaysToFinish: task.estimateDaysToFinish }));
+            if (projectPlan?.resources) {
+                for (const resource of projectPlan.resources) {
+                    const createdResource = new Resource({
+                        title: resource.title,
+                        project: projectName
                     });
-                });
-            });
+                    await createdResource.save();
+                    projectResources.push(createdResource._id);
 
-            let project = await new Project({ 
+                    if (resource.epics) {
+                        for (const epic of resource.epics) {
+                            const createdEpic = new Epic({
+                                title: epic.title,
+                                resource: createdResource._id,
+                            });
+                            await createdEpic.save();
+                            projectEpics.push(createdEpic._id);
+
+                            if (epic.tasks) {
+                                for (const task of epic.tasks) {
+                                    const createdTask = new Task({
+                                        title: task.title,
+                                        epic: createdEpic._id,
+                                        estimateDaysToFinish: task.estimateDaysToFinish
+                                    });
+                                    await createdTask.save();
+                                    projectTasks.push(createdTask._id);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            const project = await new Project({ 
                 name: projectName, 
                 description: projectDescription, 
                 resources: projectResources, 
@@ -51,10 +75,25 @@ export const createProject = async (req: Request, res: Response) => {
                 epics: projectEpics, 
                 tasks: projectTasks, 
                 userId: userId, 
-                contributors: req.body.contributors 
             }).save();
 
-            res.status(201).send(project);
+            const populatedProject = await Project.findById(project._id)
+            .populate({
+                path: 'resources',
+                model: 'Resource',
+                populate: {
+                    path: 'epics',
+                    model: 'Epic',
+                    populate: {
+                        path: 'tasks',
+                        model: 'Task'
+                    }
+                }
+            })
+            .exec();
+
+        res.status(201).send(populatedProject);
+
         }
     } catch (err) {
         console.error("Error in createProject:", err);

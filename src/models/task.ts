@@ -1,14 +1,17 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema, Document } from 'mongoose';
 import { ITask } from './types';
 
-const taskSchema = new mongoose.Schema<ITask>({
+interface ITaskModel extends ITask, Document {}
+
+const taskSchema = new Schema<ITaskModel>({
     title: {
         type: String,
         required: true
     },
-    description: String,
-    resource: String,
-    epic: String,
+    epic: {
+        type: Schema.Types.ObjectId,
+        ref: 'Epic'
+    },
     status: {
         type: String,
         enum: ['Not Started', 'In Progress', 'Completed'],
@@ -17,5 +20,5 @@ const taskSchema = new mongoose.Schema<ITask>({
     estimateDaysToFinish: Number,
 });
 
-const Task = mongoose.model('Task', taskSchema);
+const Task = mongoose.model<ITaskModel>('Task', taskSchema);
 export default Task;
