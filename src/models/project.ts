@@ -1,24 +1,15 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import { IProject } from './types';
+import mongoose from 'mongoose';
 
-interface IProjectModel extends IProject, Document {}
-
-const projectSchema = new Schema<IProjectModel>({
-    name: {
-        type: String,
-        required: true
-    },
+const ProjectSchema = new mongoose.Schema({
+    name: String,
     description: String,
     prompt: String,
-    resources: [{
-        type: Schema.Types.ObjectId,
+    resources: [{ 
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Resource'
     }],
-    userId: {
-        type: String,
-        required: true
-    },
+    userId: String
 });
 
-const Project = mongoose.model<IProjectModel>('Project', projectSchema);
+const Project = mongoose.model('Project', ProjectSchema);
 export default Project;

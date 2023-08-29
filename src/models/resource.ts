@@ -1,19 +1,16 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import { IResource } from './types';
+import mongoose from 'mongoose';
 
-interface IResourceModel extends IResource, Document {}
-
-const resourceSchema = new Schema<IResourceModel>({
-    title: {
-        type: String,
-        required: true
+const ResourceSchema = new mongoose.Schema({
+    title: String,
+    project: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Project'
     },
-    epics: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Epic'
-    }],
-    project: String,
+    epics: [{ 
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Resource' 
+    }]
 });
 
-const Resource = mongoose.model<IResourceModel>('Resource', resourceSchema);
+const Resource = mongoose.model('Resource', ResourceSchema);
 export default Resource;

@@ -1,27 +1,16 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import { IEpic } from './types';
+import mongoose from 'mongoose';
 
-interface IEpicModel extends IEpic, Document {}
-
-const epicSchema = new Schema<IEpicModel>({
-    title: {
-        type: String,
-        required: true
-    },
+const EpicSchema = new mongoose.Schema({
+    title: String,
     resource: {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Resource'
     },
     tasks: [{
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Task'
-    }],
-    status: {
-        type: String,
-        enum: ['Not Started', 'In Progress', 'Completed'],
-        default: 'Not Started'
-    },
+    }]
 });
 
-const Epic = mongoose.model<IEpicModel>('Epic', epicSchema);
+const Epic = mongoose.model('Epic', EpicSchema);
 export default Epic;

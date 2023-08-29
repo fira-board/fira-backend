@@ -1,24 +1,14 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import { ITask } from './types';
+import mongoose  from 'mongoose';
 
-interface ITaskModel extends ITask, Document {}
-
-const taskSchema = new Schema<ITaskModel>({
-    title: {
-        type: String,
-        required: true
-    },
-    epic: {
-        type: Schema.Types.ObjectId,
-        ref: 'Epic'
-    },
-    status: {
-        type: String,
-        enum: ['Not Started', 'In Progress', 'Completed'],
-        default: 'Not Started'
-    },
+const TaskSchema = new mongoose.Schema({
+    title: String,
+    status: String,
     estimateDaysToFinish: Number,
+    epic: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Epic'
+    }
 });
 
-const Task = mongoose.model<ITaskModel>('Task', taskSchema);
+const Task = mongoose.model('Task', TaskSchema);
 export default Task;
