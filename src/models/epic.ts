@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 
 const EpicSchema = new mongoose.Schema({
     title: String,
+    status: String,
     resource: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Resource'

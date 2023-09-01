@@ -4,7 +4,6 @@ import Epic from '../models/epic';
 import Resource from '../models/resource';
 import { generateProjectPlan } from '../models/ai/ProjectPlanGenerator';
 import { Request, Response } from 'express';
-// import { ITask, IEpic, IResource, IProject } from '../models/types';
 
 export const listProjects = async (req: Request, res: Response) => {
     try {
@@ -34,7 +33,7 @@ export const createProject = async (req: Request, res: Response) => {
                     for (const taskData of epicData.tasks) {
                         const savedTask = await new Task({
                             title: taskData.title,
-                            status: "Not Started",  // Assuming the initial status for a new task is "new"
+                            status: "Not Started",
                             estimateDaysToFinish: taskData.estimateDaysToFinish,
                         }).save();
                         taskIds.push(savedTask._id);
@@ -52,7 +51,7 @@ export const createProject = async (req: Request, res: Response) => {
                 resourceIds.push(savedResource._id);
             }
 
-            const savedProject = await new Project({
+            await new Project({
                 name: projectPlan.projectName,
                 description: projectPlan.description,
                 prompt: req.body.summary,
@@ -60,74 +59,7 @@ export const createProject = async (req: Request, res: Response) => {
                 userId: userId
             }).save();
 
-            console.log(savedProject);
-            // const savedProject = await new Project({ 
-            //     name: projectName, 
-            //     description: projectDescription,
-            //     prompt: req.body.summary,
-            //     userId: userId, 
-            //     resources: 
-            // }).save();
-
-            // console.log(savedProject);
-            // if (projectPlan?.resources) {
-            //     savedProject.resources = [];
-                
-            //     for (const resourcePlan of projectPlan.resources) {
-            //         const createdResource = await new Resource({
-            //             title: resourcePlan.title,
-            //             project: savedProject._id
-            //         });
-            //         await createdResource.save();
-            //         const resourceObj = createdResource.toObject(); // Convert document to plain JS object
-            //         resourceObj.epics = [];
-
-            //         if (resourcePlan.epics) {
-            //             for (const epicPlan of resourcePlan.epics) {
-            //                 const createdEpic = await new Epic({
-            //                     title: epicPlan.title,
-            //                     resource: createdResource._id,
-            //                 });
-            //                 await createdEpic.save();
-            //                 const epicObj = createdEpic.toObject(); // Convert document to plain JS object
-            //                 epicObj.tasks = [];
-
-            //                 if (epicPlan.tasks) {
-            //                     for (const taskPlan of epicPlan.tasks) {
-            //                         const createdTask = await new Task({
-            //                             title: taskPlan.title,
-            //                             epic: createdEpic._id,
-            //                             estimateDaysToFinish: taskPlan.estimateDaysToFinish
-            //                         });
-            //                         await createdTask.save();
-            //                         // Construct an object for the response
-            //                         const taskResponseObj = {
-            //                             _id: createdTask._id,
-            //                             title: createdTask.title,
-            //                             status: createdTask.status,
-            //                             estimateDaysToFinish: createdTask.estimateDaysToFinish
-            //                         };
-            //                         epicObj.tasks.push(taskResponseObj);
-            //                     }
-            //                 }
-            //                 const epicResponseObj = {
-            //                     _id: createdEpic._id,
-            //                     title: createdEpic.title,
-            //                     tasks: epicObj.tasks // This already contains plain JS objects for tasks
-            //                 };
-            //                 resourceObj.epics.push(epicResponseObj);
-            //             }
-            //         }
-            //         const resourceResponseObj = {
-            //             _id: createdResource._id,
-            //             title: createdResource.title,
-            //             epics: resourceObj.epics  // This already contains plain JS objects for epics
-            //         };
-            //         savedProject.resources.push(resourceResponseObj);                    
-            //     }
-            // }
-
-            return res.json(projectPlan);  // Return the nested project structure
+            return res.json(projectPlan);
 
         }
     } catch (err) {
@@ -161,10 +93,8 @@ export const updateProject = async (req: Request, res: Response) => {
         const updatedData = {
             name: req.body.name,
             description: req.body.description,
+            prompt: req.body.description,
             resources: req.body.resources,
-            epics: req.body.epics,
-            tasks: req.body.tasks,
-            contributors: req.body.contributors,
         }
         const updated = await Project.updateOne({ _id: req.params.id }, updatedData);
           console.log('Project updated successfully');
