@@ -5,10 +5,10 @@ type Ref<T> = T | Types.ObjectId;
 
 export interface ITask {
     title: string;
-    resource: Ref<IResource>;
     epic: Ref<IEpic>;
     status: 'Not Started' | 'In Progress' | 'Completed';
     estimateDaysToFinish?: number;
+    project: Ref<IProject>;
 }
 
 export interface IEpic {
@@ -16,13 +16,13 @@ export interface IEpic {
     resource: Ref<IResource>;
     tasks: Ref<ITask>[];
     status: 'Not Started' | 'In Progress' | 'Completed';
+    project: Ref<IProject>;
 }
 
 export interface IResource {
     title: string;
     epics: Ref<IEpic>[];
-    tasks: Ref<ITask>[];
-    project: string;
+    project: Ref<IProject>;
 }
 
 export interface IProject {
@@ -30,5 +30,7 @@ export interface IProject {
     description?: string;
     prompt?: string;
     resources?: Ref<IResource>[];
+    epics?: Ref<IEpic>[];
+    tasks?: Ref<ITask>[];
     userId: string;
 }

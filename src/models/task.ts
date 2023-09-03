@@ -7,7 +7,11 @@ const TaskSchema = new mongoose.Schema({
     epic: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Epic'
-    }
+    },
+    project: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'project'
+    },
 });
 
 const Task = mongoose.model('Task', TaskSchema);

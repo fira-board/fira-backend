@@ -22,44 +22,73 @@ export const createProject = async (req: Request, res: Response) => {
             res.status(201).send(await new Project(req.body).save());
         }
         else {
-            const projectPlan = await generateProjectPlan(req.body.summary);
+            let projectPlan = await generateProjectPlan(req.body.summary);
+            let resourceIds: any[] = [];
+            let epicIds: any[] = [];
+            let taskIds: any[] = [];
 
-            let resourceIds = [];
-
-            for (const resourceData of projectPlan.resources) {
-                let epicIds = [];
-                for (const epicData of resourceData.epics) {
-                    let taskIds = [];
-                    for (const taskData of epicData.tasks) {
-                        const savedTask = await new Task({
-                            title: taskData.title,
-                            status: "Not Started",
-                            estimateDaysToFinish: taskData.estimateDaysToFinish,
-                        }).save();
-                        taskIds.push(savedTask._id);
-                    }
-                    const savedEpic = await new Epic({
-                        title: epicData.title,
-                        tasks: taskIds
-                    }).save();
-                    epicIds.push(savedEpic._id);
-                }
-                const savedResource = await new Resource({
-                    title: resourceData.title,
-                    epics: epicIds
-                }).save();
-                resourceIds.push(savedResource._id);
-            }
-
-            await new Project({
+            // 1. Create the project to get the projectId
+            const project = new Project({
                 name: projectPlan.projectName,
                 description: projectPlan.description,
                 prompt: req.body.summary,
-                resources: resourceIds,
                 userId: userId
-            }).save();
+            });
+            const projectId = project._id;
+
+            await Promise.all(projectPlan.resources.map(async (resource, rIndex) => {
+                let resourceEpics: any[] = [];
+                const newResource = new Resource({
+                    title: resource.title,
+                    project: projectId
+                });
+
+                await Promise.all(resource.epics.map(async (epic, eIndex) => {
+                    let epicTasks: any[] = [];
+                    const newEpic = new Epic({
+                        title: epic.title,
+                        resource: newResource._id,
+                        project: projectId
+                    });
+                    epicIds.push(newEpic._id);
+                    resourceEpics.push(newEpic._id);
+
+                    await Promise.all(epic.tasks.map(async (task, tIndex) => {
+                        const newTask = new Task({
+                            title: task.title,
+                            status: "Not Started",
+                            estimateDaysToFinish: task.estimateDaysToFinish,
+                            epic: newEpic._id,
+                            project: projectId
+                        });
+                        taskIds.push(newTask._id);
+                        epicTasks.push(newTask._id);
+                        (projectPlan.resources[rIndex].epics[eIndex].tasks[tIndex] as any)._id = newTask._id;
+                        
+                        // Save the task
+                        await newTask.save();
+                    }));
+
+                    // Save the epic
+                    newEpic.tasks = epicTasks;
+                    await newEpic.save();
+                }));
+
+                // Save the resource
+                newResource.epics = resourceEpics;
+                await newResource.save();
+                resourceIds.push(newResource._id);
+                (projectPlan.resources[rIndex] as any)._id = newResource._id;
+            }));
+
+            // Save the project with the resourceIds, epicIds, and taskIds
+            project.resources = resourceIds;
+            project.epics = epicIds;
+            project.tasks = taskIds;
+            await project.save();
 
             return res.json(projectPlan);
+          
 
         }
     } catch (err) {

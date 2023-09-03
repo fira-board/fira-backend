@@ -10,7 +10,11 @@ const EpicSchema = new mongoose.Schema({
     tasks: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Task'
-    }]
+    }],
+    project: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Project'
+    },
 });
 
 const Epic = mongoose.model('Epic', EpicSchema);

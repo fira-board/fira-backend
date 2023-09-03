@@ -8,6 +8,14 @@ const ProjectSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Resource'
     }],
+    epics: [{ 
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Epic'
+    }],
+    tasks: [{ 
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Task'
+    }],
     userId: String
 });
 
