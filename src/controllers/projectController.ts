@@ -1,7 +1,7 @@
 import Project from '../models/project';
 import Task from '../models/task';
 
-import { generateProjectPlan } from '../models/ai/ProjectPlanGenerator';
+import { generateProjectPlan } from '../models/ai/projectPlanGenerator';
 
 import { Request, Response } from 'express';
 import { ITask } from '../models/types';
