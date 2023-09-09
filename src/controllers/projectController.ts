@@ -52,6 +52,7 @@ export const createProject = async (req: Request, res: Response) => {
                     });
                     epicIds.push(newEpic._id);
                     resourceEpics.push(newEpic._id);
+                    (projectPlan.resources[rIndex].epics[eIndex] as any)._id = newEpic._id;
 
                     await Promise.all(epic.tasks.map(async (task, tIndex) => {
                         const newTask = new Task({
