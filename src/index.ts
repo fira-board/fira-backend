@@ -1,7 +1,9 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import aiRoutes from './routes/aiRoutes';
 import projectRoutes from './routes/projectRoutes';
+import taskRoutes from './routes/taskRoutes';
+import epicRoutes from './routes/epicRoutes';
+import resourceRoutes from './routes/resourceRoutes';
 import cors from 'cors';
 
 import dotenv from 'dotenv';
@@ -25,7 +27,9 @@ mongoose.connect(MONGO_URI);
 
 app.use(express.json());
 app.use('/projects', projectRoutes);
-app.use('/ai', aiRoutes);
+app.use('/tasks', taskRoutes);
+app.use('/epics', epicRoutes);
+app.use('/resources', resourceRoutes);
 
 process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);

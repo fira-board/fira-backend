@@ -16,7 +16,7 @@ export interface ProjectPlan {
 // Denotes a specific role within the project, identifying the individual or team with the expertise to execute particular tasks and epics, contributing towards the project's completion.
 export interface Resource {
     // The title or designation of the resource.
-    name: string;
+    title: string;
 
     // A list of epics associated with this resource, indicating the larger objectives they aim to achieve within the project.
     epics: (Epic)[];
@@ -28,7 +28,7 @@ export interface Resource {
 // An epic represents a larger objective within the project, encompassing a series of related tasks that work together towards achieving a common goal.
 export interface Epic {
     // The title or designation of the epic.
-    name: string;
+    title: string;
 
     // A list of tasks that form this epic, each contributing towards its completion.
     tasks: (Task)[];
