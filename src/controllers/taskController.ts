@@ -29,9 +29,22 @@ export const listTasks = async (req: Request, res: Response) => {
         res.status(500).send(err);
 }};
 
-// TODO: add logic of task generator
-export const createTask = async () => {
-    console.log("Creating task");
+export const createTask = async (req: Request, res: Response) => {
+    try {
+        const newTask = await new Task({
+            title: req.body.title,
+            status: req.body.status,
+            estimateDaysToFinish: req.body.estimateDaysToFinish,
+            epic: req.body.epicId,
+            resource: req.body.resourceId,
+            project: req.body.projectId
+        });
+
+        await newTask.save();
+        res.json(newTask._id);
+    } catch (err) {
+        res.status(500).send(err);
+    }
 };
 
 export const getTask = async (req: Request, res: Response) => {

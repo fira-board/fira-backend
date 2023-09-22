@@ -11,9 +11,21 @@ export const listEpics = async (req: Request, res: Response) => {
     }
 };
 
-// TODO: add logic of epic generator
-export const createEpic = async () => {
-    console.log("Creating epic");
+export const createEpic = async (req: Request, res: Response) => {
+    try {
+        const newEpic= new Epic({
+            title: req.body.title,
+            status: req.body.status,
+            tasks: req.body.taskIds,
+            resource: req.body.resourceId,
+            project: req.body.projectId
+        });
+
+        await newEpic.save();
+        res.json(newEpic._id);
+    } catch (err) {
+        res.status(500).send(err);
+    }
 };
 
 export const listEpic = async (req: Request, res: Response) => {

@@ -11,9 +11,19 @@ export const listResources = async (req: Request, res: Response) => {
     }
 };
 
-// TODO: add logic of resource generator
-export const createResource = async () => {
-    console.log("Creating resource");
+export const createResource = async (req: Request, res: Response) => {
+    try {
+        const newResource = new Resource({
+            title: req.body.title,
+            epics: req.body.epicIds,
+            project: req.body.projectId
+        });
+
+        await newResource.save();
+        res.json(newResource._id);
+    } catch (err) {
+        res.status(500).send(err);
+    }
 };
 
 export const listResource = async (req: Request, res: Response) => {
