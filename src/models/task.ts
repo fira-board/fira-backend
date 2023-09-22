@@ -5,6 +5,10 @@ const TaskSchema = new mongoose.Schema({
     status: String,
     userId: String,
     estimateDaysToFinish: Number,
+    deleted: {
+        type: Boolean,
+        default: false
+    },
     epic: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'epic'

@@ -27,7 +27,6 @@ export const createProject = async (req: Request, res: Response) => {
             let epicIds: any[] = [];
             let taskIds: any[] = [];
 
-            // 1. Create the project to get the projectId
             const project = new Project({
                 name: projectPlan.projectName,
                 description: projectPlan.description,
@@ -38,6 +37,7 @@ export const createProject = async (req: Request, res: Response) => {
 
             await Promise.all(projectPlan.resources.map(async (resource, rIndex) => {
                 let resourceEpics: any[] = [];
+                let resourceTasks: any[] = [];
                 const newResource = new Resource({
                     title: resource.title,
                     project: projectId
@@ -48,7 +48,8 @@ export const createProject = async (req: Request, res: Response) => {
                     const newEpic = new Epic({
                         title: epic.title,
                         resource: newResource._id,
-                        project: projectId
+                        project: projectId,
+                        deleted: false
                     });
                     epicIds.push(newEpic._id);
                     resourceEpics.push(newEpic._id);
@@ -60,10 +61,12 @@ export const createProject = async (req: Request, res: Response) => {
                             status: "Not Started",
                             estimateDaysToFinish: task.estimateDaysToFinish,
                             epic: newEpic._id,
-                            project: projectId
+                            project: projectId,
+                            deleted: false
                         });
                         taskIds.push(newTask._id);
                         epicTasks.push(newTask._id);
+                        resourceTasks.push(newTask._id);
                         (projectPlan.resources[rIndex].epics[eIndex].tasks[tIndex] as any)._id = newTask._id;
                         
                         // Save the task
@@ -77,6 +80,7 @@ export const createProject = async (req: Request, res: Response) => {
 
                 // Save the resource
                 newResource.epics = resourceEpics;
+                newResource.tasks = resourceTasks;
                 await newResource.save();
                 resourceIds.push(newResource._id);
                 (projectPlan.resources[rIndex] as any)._id = newResource._id;

@@ -6,6 +6,10 @@ const ResourceSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'project'
     },
+    tasks: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'task'
+    }],
     epics: [{ 
         type: mongoose.Schema.Types.ObjectId,
         ref: 'resource' 

@@ -3,6 +3,10 @@ import mongoose from 'mongoose';
 const EpicSchema = new mongoose.Schema({
     title: String,
     status: String,
+    deleted: {
+        type: Boolean,
+        default: false
+    },
     resource: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'resource'
