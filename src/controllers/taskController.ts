@@ -1,12 +1,20 @@
 import Task from "../models/task";
 import Epic from "../models/epic";
 import Project from "../models/project";
-import { Request, Response } from "express";
+import { Response } from "express";
+import { SessionRequest } from "supertokens-node/framework/express";
 
-export const listTasks = async (req: Request, res: Response) => {
+export const listTasks = async (req: SessionRequest, res: Response) => {
   try {
     // Get filter parameters from the request query
-    const { userId, projectId, epicId } = req.query;
+
+    const userId = req.session!.getUserId();
+
+    if (userId === undefined) {
+      res.status(401).send("Unauthorized");
+    }
+
+    const { projectId, epicId } = req.query;
 
     // Build a query object based on the provided filters
     const query: any = {};
@@ -31,8 +39,15 @@ export const listTasks = async (req: Request, res: Response) => {
   }
 };
 
-export const createTask = async (req: Request, res: Response) => {
+export const createTask = async (req: SessionRequest, res: Response) => {
   try {
+
+    const userId = req.session!.getUserId();
+
+    if (userId === undefined) {
+      res.status(401).send("Unauthorized");
+    }
+
     const newTask = await new Task({
       title: req.body.title,
       status: req.body.status,
@@ -40,6 +55,7 @@ export const createTask = async (req: Request, res: Response) => {
       epic: req.body.epicId,
       resource: req.body.resourceId,
       project: req.body.projectId,
+      userId: userId,
     });
 
     await newTask.save();
@@ -62,9 +78,15 @@ export const createTask = async (req: Request, res: Response) => {
   }
 };
 
-export const getTask = async (req: Request, res: Response) => {
+export const getTask = async (req: SessionRequest, res: Response) => {
   try {
-    const task = await Task.findOne({ _id: req.params.id, deleted: false });
+    const userId = req.session!.getUserId();
+
+    if (userId === undefined) {
+      res.status(401).send("Unauthorized");
+    }
+
+    const task = await Task.findOne({ _id: req.params.id, userId: userId, deleted: false });
     if (!task) {
       return res.status(404).send("Task not found or marked as deleted");
     }
@@ -75,10 +97,17 @@ export const getTask = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteTask = async (req: Request, res: Response) => {
+export const deleteTask = async (req: SessionRequest, res: Response) => {
   try {
+
+    const userId = req.session!.getUserId();
+
+    if (userId === undefined) {
+      res.status(401).send("Unauthorized");
+    }
+
     const deleted = await Task.updateOne(
-      { _id: req.params.id },
+      { _id: req.params.id, userId: userId },
       { deleted: true }
     );
     const task = await Task.findOne({ _id: req.params.id });
@@ -106,15 +135,21 @@ export const deleteTask = async (req: Request, res: Response) => {
   }
 };
 
-export const updateTask = async (req: Request, res: Response) => {
+export const updateTask = async (req: SessionRequest, res: Response) => {
   try {
+    const userId = req.session!.getUserId();
+
+    if (userId === undefined) {
+      res.status(401).send("Unauthorized");
+    }
+
     const updatedData = {
       title: req.body.title,
       status: req.body.status,
       estimateDaysToFinish: req.body.estimateDaysToFinish,
       epic: req.body.epic,
     };
-    const updated = await Task.updateOne({ _id: req.params.id }, updatedData);
+    const updated = await Task.updateOne({ _id: req.params.id ,userId: userId}, updatedData);
     console.log("Task updated successfully");
     res.json(updated);
   } catch (err) {

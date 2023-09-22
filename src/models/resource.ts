@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const ResourceSchema = new mongoose.Schema({
   title: String,
+  userId:String,
   project: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "project",

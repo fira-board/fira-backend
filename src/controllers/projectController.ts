@@ -3,21 +3,33 @@ import Task from "../models/task";
 import Epic from "../models/epic";
 import Resource from "../models/resource";
 import { generateProjectPlan } from "../models/ai/ProjectPlanGenerator";
-import { Request, Response } from "express";
+import { Response } from "express";
+import { SessionRequest } from "supertokens-node/framework/express";
 
-export const listProjects = async (req: Request, res: Response) => {
+
+export const listProjects = async (req: SessionRequest, res: Response) => {
   try {
-    console.log(req);
-    const projects = await Project.find();
+    const userId = req.session!.getUserId();
+
+    if (userId === undefined) {
+      res.status(401).send("Unauthorized");
+    }
+
+    const projects = await Project.find({ userId: userId });
     res.json(projects);
   } catch (err) {
     res.status(500).send(err);
   }
 };
 
-export const createProject = async (req: Request, res: Response) => {
+export const createProject = async (req: SessionRequest, res: Response) => {
   try {
-    let userId = "uuid21312321";
+    const userId = req.session!.getUserId();
+
+    if (userId === undefined) {
+      res.status(401).send("Unauthorized");
+    }
+
     if (req.params.empty) {
       res.status(201).send(await new Project(req.body).save());
     } else {
@@ -41,6 +53,7 @@ export const createProject = async (req: Request, res: Response) => {
           const newResource = new Resource({
             title: resource.title,
             project: projectId,
+            userId: userId,
           });
 
           await Promise.all(
@@ -50,6 +63,7 @@ export const createProject = async (req: Request, res: Response) => {
                 title: epic.title,
                 resource: newResource._id,
                 project: projectId,
+                userId: userId,
                 deleted: false,
               });
               epicIds.push(newEpic._id);
@@ -61,6 +75,7 @@ export const createProject = async (req: Request, res: Response) => {
                 epic.tasks.map(async (task, tIndex) => {
                   const newTask = new Task({
                     title: task.title,
+                    userId: userId,
                     status: "Not Started",
                     estimateDaysToFinish: task.estimateDaysToFinish,
                     epic: newEpic._id,
@@ -72,7 +87,7 @@ export const createProject = async (req: Request, res: Response) => {
                   resourceTasks.push(newTask._id);
                   (
                     projectPlan.resources[rIndex].epics[eIndex].tasks[
-                      tIndex
+                    tIndex
                     ] as any
                   )._id = newTask._id;
 
@@ -110,9 +125,15 @@ export const createProject = async (req: Request, res: Response) => {
   }
 };
 
-export const listProject = async (req: Request, res: Response) => {
+export const getProject = async (req: SessionRequest, res: Response) => {
   try {
-    const project = await Project.findOne({ _id: req.params.id });
+    const userId = req.session!.getUserId();
+
+    if (userId === undefined) {
+      res.status(401).send("Unauthorized");
+    }
+
+    const project = await Project.findOne({ _id: req.params.id, userId: userId });
     console.log("Project found");
     res.json(project);
   } catch (err) {
@@ -120,9 +141,15 @@ export const listProject = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteProject = async (req: Request, res: Response) => {
+export const deleteProject = async (req: SessionRequest, res: Response) => {
   try {
-    const deleted = await Project.deleteOne({ _id: req.params.id });
+    const userId = req.session!.getUserId();
+
+    if (userId === undefined) {
+      res.status(401).send("Unauthorized");
+    }
+
+    const deleted = await Project.deleteOne({ _id: req.params.id, userId: userId });
     console.log("Project deleted successfully");
     res.json(deleted);
   } catch (err) {
@@ -130,7 +157,13 @@ export const deleteProject = async (req: Request, res: Response) => {
   }
 };
 
-export const updateProject = async (req: Request, res: Response) => {
+export const updateProject = async (req: SessionRequest, res: Response) => {
+  const userId = req.session!.getUserId();
+
+  if (userId === undefined) {
+    res.status(401).send("Unauthorized");
+  }
+
   try {
     const updatedData = {
       name: req.body.name,
@@ -139,7 +172,7 @@ export const updateProject = async (req: Request, res: Response) => {
       resources: req.body.resources,
     };
     const updated = await Project.updateOne(
-      { _id: req.params.id },
+      { _id: req.params.id, userId: userId },
       updatedData
     );
     console.log("Project updated successfully");

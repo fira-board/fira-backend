@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 const EpicSchema = new mongoose.Schema({
   title: String,
   status: String,
+  userId:String,
   deleted: {
     type: Boolean,
     default: false,

@@ -1,14 +1,15 @@
 import express from "express";
 import * as resourceController from "../controllers/resourceController";
 import { asyncWrapper } from "../asyncWrapper";
+import { verifySession } from "supertokens-node/recipe/session/framework/express";
 
 const router = express.Router();
 
-router.get("/", asyncWrapper(resourceController.listResources));
-router.get("/:id", asyncWrapper(resourceController.listResource));
-router.post("/", asyncWrapper(resourceController.createResource));
-router.delete("/:id", asyncWrapper(resourceController.deleteResource));
-router.put("/:id", asyncWrapper(resourceController.updateResource));
+router.get("/", verifySession(), asyncWrapper(resourceController.listResources));
+router.get("/:id", verifySession(), asyncWrapper(resourceController.listResource));
+router.post("/", verifySession(), asyncWrapper(resourceController.createResource));
+router.delete("/:id", verifySession(), asyncWrapper(resourceController.deleteResource));
+router.put("/:id", verifySession(), asyncWrapper(resourceController.updateResource));
 
 // ... You can add more routes for update, delete, and add contributors.
 

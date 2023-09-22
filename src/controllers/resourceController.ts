@@ -2,12 +2,19 @@ import Resource from "../models/resource";
 import Project from "../models/project";
 import Epic from "../models/epic";
 import Task from "../models/task";
-import { Request, Response } from "express";
+import { Response } from "express";
+import { SessionRequest } from "supertokens-node/framework/express";
 
-export const listResources = async (req: Request, res: Response) => {
+export const listResources = async (req: SessionRequest, res: Response) => {
   try {
+    const userId = req.session!.getUserId();
+
+    if (userId === undefined) {
+      res.status(401).send("Unauthorized");
+    }
+
     // Get filter parameters from the request query
-    const { userId, projectId } = req.query;
+    const { projectId } = req.query;
 
     // Build a query object based on the provided filters
     const query: any = {};
@@ -27,11 +34,19 @@ export const listResources = async (req: Request, res: Response) => {
   }
 };
 
-export const createResource = async (req: Request, res: Response) => {
+export const createResource = async (req: SessionRequest, res: Response) => {
   try {
+
+    const userId = req.session!.getUserId();
+
+    if (userId === undefined) {
+      res.status(401).send("Unauthorized");
+    }
+
     const newResource = new Resource({
       title: req.body.title,
       project: req.body.projectId,
+      userId: userId,
     });
 
     await newResource.save();
@@ -48,9 +63,16 @@ export const createResource = async (req: Request, res: Response) => {
   }
 };
 
-export const listResource = async (req: Request, res: Response) => {
+export const listResource = async (req: SessionRequest, res: Response) => {
   try {
-    const resource = await Resource.findOne({ _id: req.params.id });
+    const userId = req.session!.getUserId();
+
+    if (userId === undefined) {
+      res.status(401).send("Unauthorized");
+    }
+
+
+    const resource = await Resource.findOne({ _id: req.params.id, userId: userId });
     console.log("Resource found");
     res.json(resource);
   } catch (err) {
@@ -58,10 +80,17 @@ export const listResource = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteResource = async (req: Request, res: Response) => {
+export const deleteResource = async (req: SessionRequest, res: Response) => {
   try {
+    const userId = req.session!.getUserId();
+
+    if (userId === undefined) {
+      res.status(401).send("Unauthorized");
+    }
+
+
     // Mark the resource as deleted instead of deleting it
-    const resource = await Resource.findById(req.params.id);
+    const resource = await Resource.findOne({ _id: req.params.id, userId: userId });
 
     if (!resource) {
       return res.status(404).send("Resource not found");
@@ -97,15 +126,22 @@ export const deleteResource = async (req: Request, res: Response) => {
   }
 };
 
-export const updateResource = async (req: Request, res: Response) => {
+export const updateResource = async (req: SessionRequest, res: Response) => {
   try {
+    const userId = req.session!.getUserId();
+
+    if (userId === undefined) {
+        res.status(401).send("Unauthorized");
+    }
+    
     const updatedData = {
       title: req.body.title,
       epics: req.body.epics,
       project: req.body.project,
+
     };
     const updated = await Resource.updateOne(
-      { _id: req.params.id },
+      { _id: req.params.id , userId: userId },
       updatedData
     );
     console.log("Resource updated successfully");
