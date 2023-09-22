@@ -4,13 +4,13 @@ const ResourceSchema = new mongoose.Schema({
     title: String,
     project: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Project'
+        ref: 'project'
     },
     epics: [{ 
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Resource' 
+        ref: 'resource' 
     }]
 });
 
-const Resource = mongoose.model('Resource', ResourceSchema);
+const Resource = mongoose.model('resource', ResourceSchema);
 export default Resource;

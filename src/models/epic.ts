@@ -5,17 +5,17 @@ const EpicSchema = new mongoose.Schema({
     status: String,
     resource: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Resource'
+        ref: 'resource'
     },
     tasks: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Task'
+        ref: 'task'
     }],
     project: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Project'
+        ref: 'project'
     },
 });
 
-const Epic = mongoose.model('Epic', EpicSchema);
+const Epic = mongoose.model('epic', EpicSchema);
 export default Epic;

@@ -5,7 +5,7 @@ import { asyncWrapper } from '../asyncWrapper';
 const router = express.Router();
 
 router.get('/', asyncWrapper(taskController.listTasks));
-router.get('/:id', asyncWrapper(taskController.listTask));
+router.get('/:id', asyncWrapper(taskController.getTask));
 router.post('/', asyncWrapper(taskController.createTask));
 router.delete('/:id', asyncWrapper(taskController.deleteTask));
 router.put('/:id', asyncWrapper(taskController.updateTask));

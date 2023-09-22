@@ -5,6 +5,7 @@ type Ref<T> = T | Types.ObjectId;
 
 export interface ITask {
     title: string;
+    userId: String;
     epic: Ref<IEpic>;
     status: 'Not Started' | 'In Progress' | 'Completed';
     estimateDaysToFinish?: number;
@@ -13,6 +14,7 @@ export interface ITask {
 
 export interface IEpic {
     title: string;
+    userId: String;
     resource: Ref<IResource>;
     tasks: Ref<ITask>[];
     status: 'Not Started' | 'In Progress' | 'Completed';
@@ -21,6 +23,7 @@ export interface IEpic {
 
 export interface IResource {
     title: string;
+    userId: String;
     epics: Ref<IEpic>[];
     project: Ref<IProject>;
 }

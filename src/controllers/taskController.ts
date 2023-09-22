@@ -2,21 +2,39 @@ import Task from '../models/task';
 import { Request, Response } from 'express';
 
 export const listTasks = async (req: Request, res: Response) => {
-    try {
-        console.log(req);
-        const tasks = await Task.find();
+       try {
+        // Get filter parameters from the request query
+        const { userId, resourceIds, epicId } = req.query;
+
+        // Build a query object based on the provided filters
+        const query: any = {};
+
+        if (userId) {
+            query.userId = userId;
+        }
+
+        if (resourceIds) {
+            query.resourceIds = { $in: resourceIds instanceof Array ? resourceIds : [resourceIds] };
+        }
+
+        if (epicId) {
+            query.epicId = epicId;
+        }
+
+        // Find tasks based on the query object
+        const tasks = await Task.find(query);
+
         res.json(tasks);
     } catch (err) {
         res.status(500).send(err);
-    }
-};
+}};
 
 // TODO: add logic of task generator
 export const createTask = async () => {
     console.log("Creating task");
 };
 
-export const listTask = async (req: Request, res: Response) => {
+export const getTask = async (req: Request, res: Response) => {
     try {
         const task = await Task.findOne({ _id: req.params.id });
           console.log('Task found');

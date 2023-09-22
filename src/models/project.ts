@@ -6,18 +6,18 @@ const ProjectSchema = new mongoose.Schema({
     prompt: String,
     resources: [{ 
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Resource'
+        ref: 'resource'
     }],
     epics: [{ 
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Epic'
+        ref: 'epic'
     }],
     tasks: [{ 
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Task'
+        ref: 'task'
     }],
     userId: String
 });
 
-const Project = mongoose.model('Project', ProjectSchema);
+const Project = mongoose.model('project', ProjectSchema);
 export default Project;
