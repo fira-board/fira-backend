@@ -1,20 +1,24 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const ResourceSchema = new mongoose.Schema({
-    title: String,
-    project: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'project'
+  title: String,
+  project: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "project",
+  },
+  tasks: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "task",
     },
-    tasks: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'task'
-    }],
-    epics: [{ 
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'resource' 
-    }]
+  ],
+  epics: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "resource",
+    },
+  ],
 });
 
-const Resource = mongoose.model('resource', ResourceSchema);
+const Resource = mongoose.model("resource", ResourceSchema);
 export default Resource;

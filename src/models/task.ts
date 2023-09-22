@@ -1,28 +1,27 @@
-import mongoose  from 'mongoose';
+import mongoose from "mongoose";
 
 const TaskSchema = new mongoose.Schema({
-    title: String,
-    status: String,
-    userId: String,
-    estimateDaysToFinish: Number,
-    deleted: {
-        type: Boolean,
-        default: false
-    },
-    epic: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'epic'
-    },
-    resource:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'resource'
-
-    },
-    project: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'project'
-    },
+  title: String,
+  status: String,
+  userId: String,
+  estimateDaysToFinish: Number,
+  deleted: {
+    type: Boolean,
+    default: false,
+  },
+  epic: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "epic",
+  },
+  resource: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "resource",
+  },
+  project: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "project",
+  },
 });
 
-const Task = mongoose.model('Task', TaskSchema);
+const Task = mongoose.model("Task", TaskSchema);
 export default Task;
