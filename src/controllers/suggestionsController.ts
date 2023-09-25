@@ -25,8 +25,8 @@ export const suggestNewEpic = async (req: SessionRequest, res: Response) => {
         }
 
         const epics = Epic.find({ _id: { $in: project.epics} },{ deleted: false });
-
         
+
         res.json("sucessfully added feedback");
     } catch (err) {
         res.status(500).send(err);

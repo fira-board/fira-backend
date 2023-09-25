@@ -6,7 +6,7 @@ import { createLanguageModel, createJsonTranslator } from "typechat";
 import { EpicSuggestions } from "./EpicSuggestionsSchema";
 
 // TODO: use local .env file.
-dotenv.config({ path: path.join(__dirname, "../../.env") });
+dotenv.config({ path: path.join(__dirname, "../../../.env") });
 
 const model = createLanguageModel(process.env);
 const schema = fs.readFileSync(
