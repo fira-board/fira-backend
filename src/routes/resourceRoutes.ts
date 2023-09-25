@@ -11,6 +11,4 @@ router.post("/", verifySession(), asyncWrapper(resourceController.createResource
 router.delete("/:id", verifySession(), asyncWrapper(resourceController.deleteResource));
 router.put("/:id", verifySession(), asyncWrapper(resourceController.updateResource));
 
-// ... You can add more routes for update, delete, and add contributors.
-
 export default router;

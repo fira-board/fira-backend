@@ -11,6 +11,4 @@ router.post("/", verifySession(), asyncWrapper(epicController.createEpic));
 router.delete("/:id", verifySession(), asyncWrapper(epicController.deleteEpic));
 router.put("/:id", verifySession(), asyncWrapper(epicController.updateEpic));
 
-// ... You can add more routes for update, delete, and add contributors.
-
 export default router;

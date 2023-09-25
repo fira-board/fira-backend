@@ -11,6 +11,4 @@ router.post("/", verifySession(), asyncWrapper(taskController.createTask));
 router.delete("/:id", verifySession(), asyncWrapper(taskController.deleteTask));
 router.put("/:id", verifySession(), asyncWrapper(taskController.updateTask));
 
-// ... You can add more routes for update, delete, and add contributors.
-
 export default router;

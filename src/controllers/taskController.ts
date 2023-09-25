@@ -149,7 +149,7 @@ export const updateTask = async (req: SessionRequest, res: Response) => {
       estimateDaysToFinish: req.body.estimateDaysToFinish,
       epic: req.body.epic,
     };
-    const updated = await Task.updateOne({ _id: req.params.id ,userId: userId}, updatedData);
+    const updated = await Task.updateOne({ _id: req.params.id, userId: userId }, updatedData);
     console.log("Task updated successfully");
     res.json(updated);
   } catch (err) {

@@ -131,9 +131,9 @@ export const updateResource = async (req: SessionRequest, res: Response) => {
     const userId = req.session!.getUserId();
 
     if (userId === undefined) {
-        res.status(401).send("Unauthorized");
+      res.status(401).send("Unauthorized");
     }
-    
+
     const updatedData = {
       title: req.body.title,
       epics: req.body.epics,
@@ -141,7 +141,7 @@ export const updateResource = async (req: SessionRequest, res: Response) => {
 
     };
     const updated = await Resource.updateOne(
-      { _id: req.params.id , userId: userId },
+      { _id: req.params.id, userId: userId },
       updatedData
     );
     console.log("Resource updated successfully");

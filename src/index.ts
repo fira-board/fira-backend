@@ -4,6 +4,9 @@ import projectRoutes from "./routes/projectRoutes";
 import taskRoutes from "./routes/taskRoutes";
 import epicRoutes from "./routes/epicRoutes";
 import resourceRoutes from "./routes/resourceRoutes";
+import feedbackRoutes from "./routes/feedbackRoutes";
+import suggestionRoutes from "./routes/suggestionsRoutes";
+
 import cors from "cors";
 
 import supertokens from "supertokens-node";
@@ -25,10 +28,10 @@ const PORT = process.env.PORT || 3001;
 
 app.use(
   cors({
-      origin: getWebsiteDomain(),
-      allowedHeaders: ["content-type", ...supertokens.getAllCORSHeaders()],
-      methods: ["GET", "PUT", "POST", "DELETE"],
-      credentials: true,
+    origin: getWebsiteDomain(),
+    allowedHeaders: ["content-type", ...supertokens.getAllCORSHeaders()],
+    methods: ["GET", "PUT", "POST", "DELETE"],
+    credentials: true,
   })
 );
 
@@ -53,14 +56,16 @@ app.use("/projects", projectRoutes);
 app.use("/tasks", taskRoutes);
 app.use("/epics", epicRoutes);
 app.use("/resources", resourceRoutes);
+app.use("/feedback", feedbackRoutes);
+app.use("/suggestions", suggestionRoutes);
 
 //session info
 app.get("/sessioninfo", verifySession(), async (req: SessionRequest, res) => {
   let session = req.session;
   res.send({
-      sessionHandle: session!.getHandle(),
-      userId: session!.getUserId(),
-      accessTokenPayload: session!.getAccessTokenPayload(),
+    sessionHandle: session!.getHandle(),
+    userId: session!.getUserId(),
+    accessTokenPayload: session!.getAccessTokenPayload(),
   });
 });
 

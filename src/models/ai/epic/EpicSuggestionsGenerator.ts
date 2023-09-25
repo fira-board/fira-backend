@@ -3,7 +3,7 @@ import path from "path";
 import dotenv from "dotenv";
 
 import { createLanguageModel, createJsonTranslator } from "typechat";
-import { ProjectPlan } from "../ai/ProjectPlanSchema";
+import { EpicSuggestions } from "./EpicSuggestionsSchema";
 
 // TODO: use local .env file.
 dotenv.config({ path: path.join(__dirname, "../../.env") });
@@ -13,17 +13,16 @@ const schema = fs.readFileSync(
   path.join("src/models/ai/", "ProjectPlanSchema.ts"),
   "utf8"
 );
-const translator = createJsonTranslator<ProjectPlan>(
+const translator = createJsonTranslator<EpicSuggestions>(
   model,
   schema,
   "ProjectPlan"
 );
 
-export const generateProjectPlan = async (summary: String) => {
+export const generateEpicSugestions = async (projectPlan: String, resourceName: String) => {
   try {
-    const prompt = summary.concat(
-      " be detailed as much as possible to get the best results. each plan need to have at least six epics and three tasks for each at least for each epic."
-    );
+    const prompt = 'this is a Json object that represnts a project plan: {projectplan}  \nSuggest three new epics for the resource {resourceName}';
+    
     const response = await translator.translate(prompt);
 
     if (!response.success) {

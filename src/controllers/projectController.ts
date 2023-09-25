@@ -2,7 +2,7 @@ import Project from "../models/project";
 import Task from "../models/task";
 import Epic from "../models/epic";
 import Resource from "../models/resource";
-import { generateProjectPlan } from "../models/ai/ProjectPlanGenerator";
+import { generateProjectPlan } from "../models/ai/project/ProjectPlanGenerator";
 import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
 

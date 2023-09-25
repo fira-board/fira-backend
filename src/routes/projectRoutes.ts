@@ -12,6 +12,4 @@ router.post("/", verifySession(), asyncWrapper(projectController.createProject))
 router.delete("/:id", verifySession(), asyncWrapper(projectController.deleteProject));
 router.put("/:id", verifySession(), asyncWrapper(projectController.updateProject));
 
-// ... You can add more routes for update, delete, and add contributors.
-
 export default router;
