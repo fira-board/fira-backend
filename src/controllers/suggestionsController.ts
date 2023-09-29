@@ -1,9 +1,6 @@
 
 import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
-import Feedback from "../models/feedback";
-import Epic from "../models/epic";
-import Task from "../models/task";
 import Project from "../models/project";
 
 
@@ -22,10 +19,7 @@ export const suggestNewEpic = async (req: SessionRequest, res: Response) => {
 
         if( project === null){
             res.status(400).send("Unauthorized");
-        }
-
-        const epics = Epic.find({ _id: { $in: project.epics} },{ deleted: false });
-        
+        }        
 
         res.json("sucessfully added feedback");
     } catch (err) {

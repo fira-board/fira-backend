@@ -9,13 +9,13 @@ import { SessionRequest } from "supertokens-node/framework/express";
 
 export const listProjects = async (req: SessionRequest, res: Response) => {
   try {
-    const userId = req.session!.getUserId();
+    // const userId = req.session!.getUserId();
 
-    if (userId === undefined) {
-      res.status(401).send("Unauthorized");
-    }
+    // if (userId === undefined) {
+    //   res.status(401).send("Unauthorized");
+    // }
 
-    const projects = await Project.find({ userId: userId });
+    const projects = await Project.find();
     res.json(projects);
   } catch (err) {
     res.status(500).send(err);
@@ -24,11 +24,10 @@ export const listProjects = async (req: SessionRequest, res: Response) => {
 
 export const createProject = async (req: SessionRequest, res: Response) => {
   try {
-    const userId = req.session!.getUserId();
-
-    if (userId === undefined) {
-      res.status(401).send("Unauthorized");
-    }
+    const userId = "uuid21312321";
+    // if (userId === undefined) {
+    //   res.status(401).send("Unauthorized");
+    // }
 
     if (req.params.empty) {
       res.status(201).send(await new Project(req.body).save());
@@ -79,6 +78,7 @@ export const createProject = async (req: SessionRequest, res: Response) => {
                     status: "Not Started",
                     estimateDaysToFinish: task.estimateDaysToFinish,
                     epic: newEpic._id,
+                    resource: newResource._id,
                     project: projectId,
                     deleted: false,
                   });

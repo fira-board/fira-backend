@@ -80,11 +80,11 @@ export const createTask = async (req: SessionRequest, res: Response) => {
 
 export const getTask = async (req: SessionRequest, res: Response) => {
   try {
-    const userId = req.session!.getUserId();
+    const userId = "uuid21312321";
 
-    if (userId === undefined) {
-      res.status(401).send("Unauthorized");
-    }
+    // if (userId === undefined) {
+    //   res.status(401).send("Unauthorized");
+    // }
 
     const task = await Task.findOne({ _id: req.params.id, userId: userId, deleted: false });
     if (!task) {

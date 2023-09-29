@@ -2,6 +2,7 @@ import Resource from "../models/resource";
 import Project from "../models/project";
 import Epic from "../models/epic";
 import Task from "../models/task";
+import fetchWithReferences from "../utility/referenceMapping"
 import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
 
@@ -65,16 +66,17 @@ export const createResource = async (req: SessionRequest, res: Response) => {
 
 export const listResource = async (req: SessionRequest, res: Response) => {
   try {
-    const userId = req.session!.getUserId();
+    // const userId = req.session!.getUserId();
 
-    if (userId === undefined) {
-      res.status(401).send("Unauthorized");
-    }
+    // if (userId === undefined) {
+    //   res.status(401).send("Unauthorized");
+    // }
 
+    const resource = await Resource.findOne({ _id: req.params.id });
 
-    const resource = await Resource.findOne({ _id: req.params.id, userId: userId });
+    const result = await fetchWithReferences(resource, "resource");
     console.log("Resource found");
-    res.json(resource);
+    res.json(result);
   } catch (err) {
     res.status(500).send(err);
   }
