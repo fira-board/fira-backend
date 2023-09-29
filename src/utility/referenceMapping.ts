@@ -1,93 +1,109 @@
+import Resource from "../models/resource";
 import Epic from "../models/epic";
 import Task from "../models/task";
 
 type ModelType = "project" | "resource" | "epic" | "task";
 
-export const fetchWithReferences = async (inputModel: any, type: ModelType) => {
-  const model = "toObject" in inputModel ? inputModel.toObject() : inputModel;
+export const fetchWithReferences = async (models: any | any[], type: ModelType) => {
+    // Convert to plain objects if they're Mongoose documents.
+    if (models.toObject) {
+      models = models.toObject();
+    } else if (Array.isArray(models) && models[0]?.toObject) {
+      models = models.map(model => model.toObject());
+    }
 
-  switch (type) {
-    case "resource":
-      const [epics, tasks] = await Promise.all([
-        Epic.find({ resource: model._id, deleted: false }).lean(),
-        Task.find({ resource: model._id, deleted: false }).lean(),
-      ]);
+    const isMultiple = Array.isArray(models);
+    const output: any[] = [];
+    
+    const ids = isMultiple ? models.map((model: any) => model._id.toString()) : [models._id.toString()];
 
-      const taskMapping = tasks.reduce((acc: { [id: string]: any }, task) => {
-        acc[task._id.toString()] = task;
-        return acc;
-      }, {});
+    switch (type) {
+        case 'resource':
+            const epics = await Epic.find({ resource: { $in: ids }, deleted: false }).lean();
+            const tasks = await Task.find({ resource: { $in: ids }, deleted: false }).lean();
 
-      const mappedEpics = epics.reduce<{ [title: string]: any }>(
-        (acc, epic) => {
-          acc[epic.title!] = {
-            ...epic,
-            tasks: epic.tasks
-              .map((taskId: any) => taskMapping[taskId.toString()] || null)
-              .filter(Boolean),
-          };
-          return acc;
-        },
-        {}
-      );
+            const handleResource = (model: any) => {
+                const relevantEpics = epics.filter(epic => epic.resource?.toString() === model._id.toString());
 
-      const { tasks: _, ...resourceWithoutTasks } = model;
+                const structuredModel = {
+                    ...model,
+                    epics: relevantEpics.reduce((acc: { [title: string]: any }, epic) => {
+                        acc[epic.title!] = {
+                            ...epic,
+                            tasks: epic.tasks.map((taskId: any) => tasks.find(task => task._id.toString() === taskId.toString()) || null).filter(Boolean)
+                        };
+                        return acc;
+                    }, {})
+                };
 
-      return {
-        ...resourceWithoutTasks,
-        epics: mappedEpics,
-      };
+                // Remove the top-level tasks array
+                delete structuredModel.tasks;
 
-    case "epic":
-      const epicTasks = await Task.find({
-        epic: model._id,
-        deleted: false,
-      }).lean();
-      return {
-        ...model,
-        tasks: epicTasks,
-      };
+                output.push(structuredModel);
+            }
 
-    case "project":
-      const [associatedResources, associatedEpics, associatedTasks] =
-        await Promise.all([
-          Resource.find({ project: model._id }).lean(),
-          Epic.find({ project: model._id, deleted: false }).lean(),
-          Task.find({ project: model._id, deleted: false }).lean(),
-        ]);
+            if (isMultiple) {
+                models.forEach(handleResource);
+            } else {
+                handleResource(models);
+                return output[0];
+            }
+            break;
 
-      const taskMappingForProject = associatedTasks.reduce(
-        (acc: { [id: string]: any }, task) => {
-          acc[task._id.toString()] = task;
-          return acc;
-        },
-        {}
-      );
+        case 'epic':
+            const epicTasks = await Task.find({ epic: { $in: ids }, deleted: false }).lean();
 
-      const mappedEpicsForProject = associatedEpics.reduce<{
-        [title: string]: any;
-      }>((acc, epic) => {
-        acc[epic.title!] = {
-          ...epic,
-          tasks: epic.tasks
-            .map(
-              (taskId: any) => taskMappingForProject[taskId.toString()] || null
-            )
-            .filter(Boolean),
-        };
-        return acc;
-      }, {});
+            const handleEpic = (model: any) => {
+                const relevantTasks = epicTasks.filter(task => task.epic?.toString() === model._id.toString());
+                const structuredModel = {
+                    ...model,
+                    tasks: relevantTasks
+                };
 
-      return {
-        ...model,
-        resources: associatedResources,
-        epics: mappedEpicsForProject,
-        tasks: associatedTasks,
-      };
+                output.push(structuredModel);
+            }
 
-    default:
-      throw new Error(`Unsupported type: ${type}`);
-  }
+            if (isMultiple) {
+                models.forEach(handleEpic);
+            } else {
+                handleEpic(models);
+                return output[0];
+            }
+            break;
+
+        case 'project':
+            const projectResources = await Resource.find({ project: { $in: ids } }).lean();
+            const projectEpics = await Epic.find({ project: { $in: ids } }).lean();
+
+            const handleProject = (model: any) => {
+                const relevantResources = projectResources.filter(resource => resource.project?.toString() === model._id.toString());
+                const relevantEpics = projectEpics.filter(epic => epic.project?.toString() === model._id.toString());
+                const structuredModel = {
+                    ...model,
+                    resources: relevantResources,
+                    epics: relevantEpics
+                };
+
+                // Remove the top-level tasks array
+                delete structuredModel.tasks;
+                delete structuredModel.epics;
+
+                output.push(structuredModel);
+            }
+
+            if (isMultiple) {
+                models.forEach(handleProject);
+            } else {
+                handleProject(models);
+                return output[0];
+            }
+            break;
+
+        default:
+            throw new Error(`Unsupported type: ${type}`);
+    }
+
+    return output;
 };
 
 export default fetchWithReferences;

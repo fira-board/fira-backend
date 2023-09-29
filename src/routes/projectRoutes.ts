@@ -6,9 +6,9 @@ import { verifySession } from "supertokens-node/recipe/session/framework/express
 
 const router = express.Router();
 
-router.get("/", asyncWrapper(projectController.listProjects));
+router.get("/", verifySession(), asyncWrapper(projectController.listProjects));
 router.get("/:id", verifySession(), asyncWrapper(projectController.getProject));
-router.post("/",  asyncWrapper(projectController.createProject));
+router.post("/",  verifySession(), asyncWrapper(projectController.createProject));
 router.delete("/:id", verifySession(), asyncWrapper(projectController.deleteProject));
 router.put("/:id", verifySession(), asyncWrapper(projectController.updateProject));
 

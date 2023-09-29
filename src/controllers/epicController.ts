@@ -2,6 +2,7 @@ import Epic from "../models/epic";
 import Project from "../models/project";
 import Resource from "../models/resource";
 import Task from "../models/task";
+import fetchWithReferences from "../utility/referenceMapping"
 import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
 
@@ -13,10 +14,8 @@ export const listEpics = async (req: SessionRequest, res: Response) => {
             res.status(401).send("Unauthorized");
         }
 
-        // Get filter parameters from the request query
         const { projectId, resourceId } = req.query;
 
-        // Build a query object based on the provided filters
         const query: any = {};
 
         query.userId = userId;
@@ -30,8 +29,11 @@ export const listEpics = async (req: SessionRequest, res: Response) => {
         }
 
         query.deleted = false;
-        // Find tasks based on the query object
-        const epics = await Epic.find(query);
+        let epics = await Epic.find(query);
+
+        if (req.query.fetch) {
+            epics = await fetchWithReferences(epics, "epic");
+        }
 
         res.json(epics);
     } catch (err) {
@@ -83,7 +85,7 @@ export const listEpic = async (req: SessionRequest, res: Response) => {
             res.status(401).send("Unauthorized");
         }
 
-        const epic = await Epic.findOne({
+        let epic = await Epic.findOne({
             _id: req.params.id,
             userId: userId,
             deleted: false,
@@ -92,6 +94,10 @@ export const listEpic = async (req: SessionRequest, res: Response) => {
         if (!epic) {
             return res.status(404).send("Epic not found or marked as deleted");
         }
+
+    if (req.query.fetch) {
+        epic = await fetchWithReferences(epic, "epic");
+    }
 
         console.log("Epic found");
         res.json(epic);

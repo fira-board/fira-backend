@@ -2,6 +2,7 @@ import Project from "../models/project";
 import Task from "../models/task";
 import Epic from "../models/epic";
 import Resource from "../models/resource";
+import fetchWithReferences from "../utility/referenceMapping"
 import { generateProjectPlan } from "../models/ai/project/ProjectPlanGenerator";
 import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
@@ -9,13 +10,18 @@ import { SessionRequest } from "supertokens-node/framework/express";
 
 export const listProjects = async (req: SessionRequest, res: Response) => {
   try {
-    // const userId = req.session!.getUserId();
+    const userId = req.session!.getUserId();
 
-    // if (userId === undefined) {
-    //   res.status(401).send("Unauthorized");
-    // }
+    if (userId === undefined) {
+      res.status(401).send("Unauthorized");
+    }
 
-    const projects = await Project.find();
+    let projects = await Project.find();
+
+    if (req.query.fetch) {
+      projects = await fetchWithReferences(projects, "project");
+    }
+
     res.json(projects);
   } catch (err) {
     res.status(500).send(err);
@@ -25,9 +31,9 @@ export const listProjects = async (req: SessionRequest, res: Response) => {
 export const createProject = async (req: SessionRequest, res: Response) => {
   try {
     const userId = "uuid21312321";
-    // if (userId === undefined) {
-    //   res.status(401).send("Unauthorized");
-    // }
+    if (userId === undefined) {
+      res.status(401).send("Unauthorized");
+    }
 
     if (req.params.empty) {
       res.status(201).send(await new Project(req.body).save());
@@ -133,7 +139,16 @@ export const getProject = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
-    const project = await Project.findOne({ _id: req.params.id, userId: userId });
+    let project = await Project.findOne({ _id: req.params.id, userId: userId });
+
+    if (!project) {
+      return res.status(404).send("Project not found");
+    }
+
+    if (req.query.fetch) {
+      project = await fetchWithReferences(project, "project");
+    }
+
     console.log("Project found");
     res.json(project);
   } catch (err) {

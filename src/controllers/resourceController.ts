@@ -14,10 +14,8 @@ export const listResources = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
-    // Get filter parameters from the request query
     const { projectId } = req.query;
 
-    // Build a query object based on the provided filters
     const query: any = {};
 
     query.userId = userId;
@@ -26,8 +24,11 @@ export const listResources = async (req: SessionRequest, res: Response) => {
       query.project = projectId;
     }
 
-    // Find tasks based on the query object
-    const resources = await Resource.find(query);
+    let resources = await Resource.find(query);
+
+    if (req.query.fetch) {
+      resources = await fetchWithReferences(resources, "resource");
+    }
 
     res.json(resources);
   } catch (err) {
@@ -66,17 +67,24 @@ export const createResource = async (req: SessionRequest, res: Response) => {
 
 export const listResource = async (req: SessionRequest, res: Response) => {
   try {
-    // const userId = req.session!.getUserId();
+    const userId = req.session!.getUserId();
 
-    // if (userId === undefined) {
-    //   res.status(401).send("Unauthorized");
-    // }
+    if (userId === undefined) {
+      res.status(401).send("Unauthorized");
+    }
 
-    const resource = await Resource.findOne({ _id: req.params.id });
+    let resource = await Resource.findOne({ _id: req.params.id, userId: userId });
 
-    const result = await fetchWithReferences(resource, "resource");
+    if (!resource) {
+      return res.status(404).send("Resource not found");
+    }
+
+    if (req.query.fetch) {
+      resource = await fetchWithReferences(resource, "resource");
+    }
+
     console.log("Resource found");
-    res.json(result);
+    res.json(resource);
   } catch (err) {
     res.status(500).send(err);
   }
@@ -90,8 +98,6 @@ export const deleteResource = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
-
-    // Mark the resource as deleted instead of deleting it
     const resource = await Resource.findOne({ _id: req.params.id, userId: userId });
 
     if (!resource) {
@@ -146,6 +152,11 @@ export const updateResource = async (req: SessionRequest, res: Response) => {
       { _id: req.params.id, userId: userId },
       updatedData
     );
+
+    if (!updated) {
+      return res.status(404).send("Resource not found");
+    }
+
     console.log("Resource updated successfully");
     res.json(updated);
   } catch (err) {
