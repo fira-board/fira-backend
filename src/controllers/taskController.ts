@@ -80,11 +80,11 @@ export const createTask = async (req: SessionRequest, res: Response) => {
 
 export const getTask = async (req: SessionRequest, res: Response) => {
   try {
-    const userId = "uuid21312321";
+    const userId = req.session!.getUserId();
 
-    // if (userId === undefined) {
-    //   res.status(401).send("Unauthorized");
-    // }
+    if (userId === undefined) {
+      res.status(401).send("Unauthorized");
+    }
 
     const task = await Task.findOne({ _id: req.params.id, userId: userId, deleted: false });
     if (!task) {
@@ -150,6 +150,11 @@ export const updateTask = async (req: SessionRequest, res: Response) => {
       epic: req.body.epic,
     };
     const updated = await Task.updateOne({ _id: req.params.id, userId: userId }, updatedData);
+
+    if (!updated) {
+      return res.status(404).send("Task not found");
+    }
+
     console.log("Task updated successfully");
     res.json(updated);
   } catch (err) {

@@ -183,6 +183,11 @@ export const updateEpic = async (req: SessionRequest, res: Response) => {
             userId: userId,
         };
         const updated = await Epic.updateOne({ _id: req.params.id }, updatedData);
+
+        if (!updated) {
+            return res.status(404).send("Epic not found");
+          }
+
         console.log("Epic updated successfully");
         res.json(updated);
     } catch (err) {

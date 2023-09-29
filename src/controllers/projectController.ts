@@ -16,7 +16,7 @@ export const listProjects = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
-    let projects = await Project.find();
+    let projects = await Project.find({ userId: userId });
 
     if (req.query.fetch) {
       projects = await fetchWithReferences(projects, "project");
@@ -30,7 +30,8 @@ export const listProjects = async (req: SessionRequest, res: Response) => {
 
 export const createProject = async (req: SessionRequest, res: Response) => {
   try {
-    const userId = "uuid21312321";
+    const userId = req.session!.getUserId();
+
     if (userId === undefined) {
       res.status(401).send("Unauthorized");
     }
@@ -190,6 +191,11 @@ export const updateProject = async (req: SessionRequest, res: Response) => {
       { _id: req.params.id, userId: userId },
       updatedData
     );
+
+    if (!updated) {
+      return res.status(404).send("Project not found");
+    }
+
     console.log("Project updated successfully");
     res.json(updated);
   } catch (err) {

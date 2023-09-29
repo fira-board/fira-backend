@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.get("/", verifySession(), asyncWrapper(projectController.listProjects));
 router.get("/:id", verifySession(), asyncWrapper(projectController.getProject));
-router.post("/",  verifySession(), asyncWrapper(projectController.createProject));
+router.post("/", verifySession(), asyncWrapper(projectController.createProject));
 router.delete("/:id", verifySession(), asyncWrapper(projectController.deleteProject));
 router.put("/:id", verifySession(), asyncWrapper(projectController.updateProject));
 
