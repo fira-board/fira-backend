@@ -43,6 +43,13 @@ export const createResource = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
+    // Cannot create resource without projectId
+    if (
+      req.body.projectId === undefined
+    ) {
+      res.status(400).send("Prerequisite element ID required");
+    }
+
     const newResource = new Resource({
       title: req.body.title,
       project: req.body.projectId,

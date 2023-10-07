@@ -47,6 +47,7 @@ export const createProject = async (req: SessionRequest, res: Response) => {
         userId: userId,
       })as IProject & Document;
       const projectId = project._id;
+      projectPlan.projectId = projectId
 
       await Promise.all(
         projectPlan.resources.map(async (resource, rIndex) => {
@@ -81,6 +82,7 @@ export const createProject = async (req: SessionRequest, res: Response) => {
                     status: "Not Started",
                     estimateDaysToFinish: task.estimateDaysToFinish,
                     epic: newEpic._id,
+                    resource: newResource._id,
                     project: projectId,
                     deleted: false,
                   }) as ITask & Document;
