@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { IProject } from "./types";
 
 const ProjectSchema = new mongoose.Schema({
   name: String,
@@ -25,5 +26,5 @@ const ProjectSchema = new mongoose.Schema({
   userId: String,
 });
 
-const Project = mongoose.model("project", ProjectSchema);
+const Project = mongoose.model<IProject>("project", ProjectSchema);
 export default Project;

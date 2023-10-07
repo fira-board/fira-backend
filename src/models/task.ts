@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { ITask } from "./types";
 
 const TaskSchema = new mongoose.Schema({
   title: String,
@@ -23,5 +24,5 @@ const TaskSchema = new mongoose.Schema({
   },
 });
 
-const Task = mongoose.model("Task", TaskSchema);
+const Task = mongoose.model<ITask>("task", TaskSchema);
 export default Task;
