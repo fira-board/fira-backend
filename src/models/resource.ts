@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { IResource } from "./types";
 
 const ResourceSchema = new mongoose.Schema({
   title: String,
@@ -21,5 +22,5 @@ const ResourceSchema = new mongoose.Schema({
   ],
 });
 
-const Resource = mongoose.model("resource", ResourceSchema);
+const Resource = mongoose.model<IResource>("resource", ResourceSchema);
 export default Resource;

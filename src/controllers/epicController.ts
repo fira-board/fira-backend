@@ -51,7 +51,7 @@ export const createEpic = async (req: SessionRequest, res: Response) => {
 
         const newEpic = new Epic({
             title: req.body.title,
-            status: req.body.status,
+            status: "Not Started",
             resource: req.body.resourceId,
             project: req.body.projectId,
             userId: userId,
@@ -59,17 +59,22 @@ export const createEpic = async (req: SessionRequest, res: Response) => {
 
         await newEpic.save();
 
-        if (req.body.resourceId) {
+        // Cannot create epic without resourceId, projectId
+        if (
+            req.body.resourceId === undefined ||
+            req.body.projectId === undefined
+          ) {
+            res.status(400).send("Prerequisite element ID required");
+          }
+
             await Resource.findByIdAndUpdate(req.body.resourceId, {
                 $push: { epics: newEpic._id },
             });
-        }
+        
 
-        if (req.body.projectId) {
             await Project.findByIdAndUpdate(req.body.projectId, {
                 $push: { epics: newEpic._id },
             });
-        }
 
         res.json(newEpic._id);
     } catch (err) {

@@ -1,5 +1,6 @@
 import Task from "../models/task";
 import Epic from "../models/epic";
+import Resource from "../models/resource";
 import Project from "../models/project";
 import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
@@ -41,16 +42,24 @@ export const listTasks = async (req: SessionRequest, res: Response) => {
 
 export const createTask = async (req: SessionRequest, res: Response) => {
   try {
-
     const userId = req.session!.getUserId();
 
     if (userId === undefined) {
       res.status(401).send("Unauthorized");
     }
 
+    // Cannot create task without epicId, resourceId, projectId
+    if (
+      req.body.epicId === undefined ||
+      req.body.resourceId === undefined ||
+      req.body.projectId === undefined
+    ) {
+      res.status(400).send("Prerequisite element ID required");
+    }
+
     const newTask = await new Task({
       title: req.body.title,
-      status: req.body.status,
+      status: "Not Started",
       estimateDaysToFinish: req.body.estimateDaysToFinish,
       epic: req.body.epicId,
       resource: req.body.resourceId,
@@ -60,17 +69,17 @@ export const createTask = async (req: SessionRequest, res: Response) => {
 
     await newTask.save();
 
-    if (req.body.epicId) {
-      await Epic.findByIdAndUpdate(req.body.epicId, {
-        $push: { tasks: newTask._id },
-      });
-    }
+    await Epic.findByIdAndUpdate(req.body.epicId, {
+      $push: { tasks: newTask._id },
+    });
 
-    if (req.body.projectId) {
-      await Project.findByIdAndUpdate(req.body.projectId, {
-        $push: { tasks: newTask._id },
-      });
-    }
+    await Resource.findByIdAndUpdate(req.body.resourceId, {
+      $push: { tasks: newTask._id },
+    });
+
+    await Project.findByIdAndUpdate(req.body.projectId, {
+      $push: { tasks: newTask._id },
+    });
 
     res.json(newTask._id);
   } catch (err) {
@@ -86,7 +95,11 @@ export const getTask = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
-    const task = await Task.findOne({ _id: req.params.id, userId: userId, deleted: false });
+    const task = await Task.findOne({
+      _id: req.params.id,
+      userId: userId,
+      deleted: false,
+    });
     if (!task) {
       return res.status(404).send("Task not found or marked as deleted");
     }
@@ -99,7 +112,6 @@ export const getTask = async (req: SessionRequest, res: Response) => {
 
 export const deleteTask = async (req: SessionRequest, res: Response) => {
   try {
-
     const userId = req.session!.getUserId();
 
     if (userId === undefined) {
@@ -118,6 +130,12 @@ export const deleteTask = async (req: SessionRequest, res: Response) => {
 
     if (task.epic) {
       await Epic.findByIdAndUpdate(task.epic, {
+        $pull: { tasks: task._id },
+      });
+    }
+
+    if (task.resource) {
+      await Resource.findByIdAndUpdate(task.resource, {
         $pull: { tasks: task._id },
       });
     }
@@ -149,12 +167,14 @@ export const updateTask = async (req: SessionRequest, res: Response) => {
       estimateDaysToFinish: req.body.estimateDaysToFinish,
       epic: req.body.epic,
     };
-    const updated = await Task.updateOne({ _id: req.params.id, userId: userId }, updatedData);
-
+    const updated = await Task.updateOne(
+      { _id: req.params.id, userId: userId },
+      updatedData
+    );
+    
     if (!updated) {
       return res.status(404).send("Task not found");
     }
-
     console.log("Task updated successfully");
     res.json(updated);
   } catch (err) {

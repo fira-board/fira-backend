@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
+import { IEpic } from "./types";
 
-const EpicSchema = new mongoose.Schema({
+const EpicSchema = new mongoose.Schema<IEpic>({
   title: String,
   status: String,
-  userId:String,
+  userId: String,
   deleted: {
     type: Boolean,
     default: false,
@@ -24,5 +25,5 @@ const EpicSchema = new mongoose.Schema({
   },
 });
 
-const Epic = mongoose.model("epic", EpicSchema);
+const Epic = mongoose.model<IEpic>("epic", EpicSchema);
 export default Epic;
