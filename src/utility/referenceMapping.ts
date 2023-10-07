@@ -71,33 +71,44 @@ export const fetchWithReferences = async (models: any | any[], type: ModelType) 
             }
             break;
 
-        case 'project':
-            const projectResources = await Resource.find({ project: { $in: ids } }).lean();
-            const projectEpics = await Epic.find({ project: { $in: ids } }).lean();
+            case 'project':
+    const projectResources = await Resource.find({ project: { $in: ids } }).lean();
+    const projectEpics = await Epic.find({ project: { $in: ids } }).lean();
+    const projectTasks = await Task.find({ project: { $in: ids } }).lean();
 
-            const handleProject = (model: any) => {
-                const relevantResources = projectResources.filter(resource => resource.project?.toString() === model._id.toString());
-                const relevantEpics = projectEpics.filter(epic => epic.project?.toString() === model._id.toString());
-                const structuredModel = {
-                    ...model,
-                    resources: relevantResources,
-                    epics: relevantEpics
-                };
+    const handleProject = (model: any) => {
+        const relevantResources = projectResources.filter(resource => resource.project?.toString() === model._id.toString());
 
-                // Remove the top-level tasks array
-                delete structuredModel.tasks;
-                delete structuredModel.epics;
+        // For each resource, attach relevant epics and their tasks
+        relevantResources.forEach(resource => {
+            const relatedEpics = projectEpics.filter(epic => epic.resource?.toString() === resource._id.toString());
 
-                output.push(structuredModel);
-            }
+            relatedEpics.forEach(epic => {
+                epic.tasks = projectTasks.filter(task => task.epic?.toString() === epic._id.toString());
+            });
 
-            if (isMultiple) {
-                models.forEach(handleProject);
-            } else {
-                handleProject(models);
-                return output[0];
-            }
-            break;
+            resource.epics = relatedEpics;
+            delete (resource as any).tasks;
+        });
+
+        const structuredModel = {
+            ...model,
+            resources: relevantResources
+        };
+
+        delete structuredModel.tasks;
+        delete structuredModel.epics;
+
+        output.push(structuredModel);
+    }
+
+    if (isMultiple) {
+        models.forEach(handleProject);
+    } else {
+        handleProject(models);
+        return output[0];
+    }
+    break;
 
         default:
             throw new Error(`Unsupported type: ${type}`);

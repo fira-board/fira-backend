@@ -11,6 +11,9 @@ export interface ProjectPlan {
 
   // The projected number of days required to complete the entire project.
   estimateDaysToFinish: number;
+
+  // The projects unique ID from the database. This will be filled later and is required empty by the AI.
+  projectId: string;
 }
 
 // Denotes a specific role within the project, identifying the individual or team with the expertise to execute particular tasks and epics, contributing towards the project's completion.
