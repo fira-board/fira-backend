@@ -38,6 +38,6 @@ export interface IProject extends Document {
   description?: string;
   prompt?: string;
   resources?: Ref<IResource>[];
-  epics?: Ref<IEpic>[];
-  tasks?: Ref<ITask>[];
+  epics: Ref<IEpic>[];
+  tasks: Ref<ITask>[];
 }

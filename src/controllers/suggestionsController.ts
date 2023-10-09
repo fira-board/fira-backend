@@ -1,68 +1,71 @@
 
-// import { Response } from "express";
-// import { SessionRequest } from "supertokens-node/framework/express";
-// import Feedback from "../models/feedback";
-// import Epic from "../models/epic";
-// import Task from "../models/task";
-// import Project from "../models/project";
+import e, { Response } from "express";
+import { SessionRequest } from "supertokens-node/framework/express";
+import Feedback from "../models/feedback";
+import Epic from "../models/epic";
+import Task from "../models/task";
+import { generateEpicSugestions } from "../models/ai/epic/EpicSuggestionsGenerator";
+import Project from "../models/project";
+import Resource from "../models/resource";
 
 
 
-// export const suggestNewEpic = async (req: SessionRequest, res: Response) => {
-//     try {
-//         const userId = req.session!.getUserId();
-        
-//         const projectId = req.params.projectId
+export const suggestNewEpic = async (req: SessionRequest, res: Response) => {
+    try {
+        const userId = req.session!.getUserId();
+        const projectId = req.params.projectId;
+        const resourceId = req.params.resourceId;
+        const order = parseInt(req.params.order);
 
-//         if (userId === undefined) {
-//             res.status(401).send("Unauthorized");
-//         }
+        if (userId === undefined) {
+            res.status(401).send("Unauthorized");
+        }
 
-//         const project = await Project.find({_id: projectId, owner: userId});
+        const project = await Project.findById({ _id: projectId, owner: userId })!;
+        const resource = await Resource.findById({ _id: resourceId, owner: userId });
 
-//         if( project === null){
-//             res.status(400).send("Unauthorized");
-//         }
+        if (project && resource) {
+            res.send(generateEpicSugestions(project, order, resource.title));
 
-//         const epics = Epic.find({ _id: { $in: project.epics} },{ deleted: false });
-        
+        } else {
+            res.status(400).send("Unauthorized");
+        }
 
-//         res.json("sucessfully added feedback");
-//     } catch (err) {
-//         res.status(500).send(err);
-//     }
-// }
-
-
-
-// export const suggestNewTask = async (req: SessionRequest, res: Response) => {
-//     try {
-//         const userId = req.session!.getUserId();
-
-//         if (userId === undefined) {
-//             res.status(401).send("Unauthorized");
-//         }
-
-//         res.json("sucessfully added feedback");
-//     } catch (err) {
-//         res.status(500).send(err);
-//     }
-// }
+    } catch (err) {
+        res.status(500).send(err);
+    }
+}
 
 
 
-// export const suggestAReviewforProject = async (req: SessionRequest, res: Response) => {
-//     try {
-//         const userId = req.session!.getUserId();
+export const suggestNewTask = async (req: SessionRequest, res: Response) => {
+    try {
+        const userId = req.session!.getUserId();
 
-//         if (userId === undefined) {
-//             res.status(401).send("Unauthorized");
-//         }
+        if (userId === undefined) {
+            res.status(401).send("Unauthorized");
+        }
 
-//         res.json("sucessfully added feedback");
-//     } catch (err) {
-//         res.status(500).send(err);
-//     }
-// }
+        res.json("sucessfully added feedback");
+    } catch (err) {
+        res.status(500).send(err);
+    }
+}
+
+
+
+export const suggestAReviewforProject = async (req: SessionRequest, res: Response) => {
+    try {
+        const userId = req.session!.getUserId();
+
+        if (userId === undefined) {
+            res.status(401).send("Unauthorized");
+        }
+
+        res.json("sucessfully added feedback");
+    } catch (err) {
+        res.status(500).send(err);
+    }
+}
 
 
