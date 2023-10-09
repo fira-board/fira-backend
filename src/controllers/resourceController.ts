@@ -5,6 +5,7 @@ import Task from "../models/task";
 import fetchWithReferences from "../utility/referenceMapping"
 import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
+import { validateParameter } from "../utility/utils";
 
 export const listResources = async (req: SessionRequest, res: Response) => {
   try {
@@ -19,14 +20,13 @@ export const listResources = async (req: SessionRequest, res: Response) => {
     const query: any = {};
 
     query.userId = userId;
-
-    if (projectId) {
-      query.project = projectId;
-    }
+    query.project = projectId;
+    validateParameter(projectId, "Project ID", ["required","string"], res);
 
     let resources = await Resource.find(query);
 
     if (req.query.fetch) {
+      validateParameter(req.params.fetch, "Fetch", ["inRange"], res, ["0","1"]);
       resources = await fetchWithReferences(resources, "resource");
     }
 
@@ -45,12 +45,8 @@ export const createResource = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
-    // Cannot create resource without projectId
-    if (
-      req.body.projectId === undefined
-    ) {
-      res.status(400).send("Prerequisite element ID required");
-    }
+    validateParameter(req.body.projectId, "Project ID", ["required","string"], res);
+    validateParameter(req.body.title, "Title", ["required","string"], res);
 
     const newResource = new Resource({
       title: req.body.title,
@@ -80,6 +76,8 @@ export const listResource = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
+    validateParameter(req.params.id, "Resource ID", ["required","string"], res);
+
     let resource = await Resource.findOne({ _id: req.params.id, userId: userId });
 
     if (!resource) {
@@ -87,6 +85,7 @@ export const listResource = async (req: SessionRequest, res: Response) => {
     }
 
     if (req.query.fetch) {
+      validateParameter(req.params.fetch, "Fetch", ["inRange"], res, ["0","1"]);
       resource = await fetchWithReferences(resource, "resource");
     }
 
@@ -104,6 +103,8 @@ export const deleteResource = async (req: SessionRequest, res: Response) => {
     if (userId === undefined) {
       res.status(401).send("Unauthorized");
     }
+
+    validateParameter(req.params.id, "Resource ID", ["required","string"], res);
 
     const resource = await Resource.findOne({ _id: req.params.id, userId: userId });
 
@@ -148,6 +149,9 @@ export const updateResource = async (req: SessionRequest, res: Response) => {
     if (userId === undefined) {
       res.status(401).send("Unauthorized");
     }
+
+    validateParameter(req.params.id, "Resource ID", ["required","string"], res);
+    validateParameter(req.body.project, "Project ID", ["required","string"], res);
 
     const updatedData = {
       title: req.body.title,

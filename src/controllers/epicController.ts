@@ -5,6 +5,7 @@ import Task from "../models/task";
 import fetchWithReferences from "../utility/referenceMapping"
 import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
+import { validateParameter } from "../utility/utils";
 
 export const listEpics = async (req: SessionRequest, res: Response) => {
     try {
@@ -21,10 +22,12 @@ export const listEpics = async (req: SessionRequest, res: Response) => {
         query.userId = userId;
 
         if (projectId) {
+            validateParameter(projectId, "Project ID", ["required","string"], res);
             query.project = projectId;
         }
 
         if (resourceId) {
+            validateParameter(resourceId, "Resource ID", ["required","string"], res);
             query.resource = resourceId;
         }
 
@@ -32,6 +35,7 @@ export const listEpics = async (req: SessionRequest, res: Response) => {
         let epics = await Epic.find(query);
 
         if (req.query.fetch) {
+            validateParameter(req.params.fetch, "Fetch", ["inRange"], res, ["0","1"]);
             epics = await fetchWithReferences(epics, "epic");
         }
 
@@ -48,6 +52,10 @@ export const createEpic = async (req: SessionRequest, res: Response) => {
         if (userId === undefined) {
             res.status(401).send("Unauthorized");
         }
+
+        validateParameter(req.params.projectId, "Project ID", ["required","string"], res);
+        validateParameter(req.params.resourceId, "Resource ID", ["required","string"], res);
+        validateParameter(req.params.title, "Title", ["required","string"], res);
 
         const newEpic = new Epic({
             title: req.body.title,
@@ -90,6 +98,8 @@ export const listEpic = async (req: SessionRequest, res: Response) => {
             res.status(401).send("Unauthorized");
         }
 
+        validateParameter(req.params.id, "Epic ID", ["required","string"], res);
+
         let epic = await Epic.findOne({
             _id: req.params.id,
             userId: userId,
@@ -101,6 +111,7 @@ export const listEpic = async (req: SessionRequest, res: Response) => {
         }
 
     if (req.query.fetch) {
+        validateParameter(req.params.fetch, "Fetch", ["inRange"], res, ["0","1"]);
         epic = await fetchWithReferences(epic, "epic");
     }
 
@@ -118,6 +129,8 @@ export const deleteEpic = async (req: SessionRequest, res: Response) => {
         if (userId === undefined) {
             res.status(401).send("Unauthorized");
         }
+
+        validateParameter(req.params.id, "Epic ID", ["required","string"], res);
 
         // Mark epic as deleted
         const deleted = await Epic.updateOne(
@@ -180,10 +193,13 @@ export const updateEpic = async (req: SessionRequest, res: Response) => {
             res.status(401).send("Unauthorized");
         }
 
+        validateParameter(req.params.id, "Epic ID", ["required","string"], res);
+        validateParameter(req.body.resourceId, "Resource ID", ["required","string"], res);
+
         const updatedData = {
             title: req.body.title,
             status: req.body.status,
-            resource: req.body.resource,
+            resource: req.body.resourceId,
             tasks: req.body.tasks,
             userId: userId,
         };

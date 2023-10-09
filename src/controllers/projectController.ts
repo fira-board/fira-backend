@@ -2,13 +2,13 @@ import Project from "../models/project";
 import Task from "../models/task";
 import Epic from "../models/epic";
 import Resource from "../models/resource";
-import fetchWithReferences from "../utility/referenceMapping"
-import { IProject, IResource, IEpic, ITask } from '../models/types';
+import fetchWithReferences from "../utility/referenceMapping";
+import { IProject, IResource, IEpic, ITask } from "../models/types";
 import { generateProjectPlan } from "../models/ai/project/ProjectPlanGenerator";
 import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
-import { Types, Document } from 'mongoose';
-
+import { Types, Document } from "mongoose";
+import { validateParameter } from "../utility/utils";
 
 export const listProjects = async (req: SessionRequest, res: Response) => {
   try {
@@ -21,6 +21,7 @@ export const listProjects = async (req: SessionRequest, res: Response) => {
     let projects = await Project.find({ userId: userId });
 
     if (req.query.fetch) {
+      validateParameter(req.params.fetch, "Fetch", ["inRange"], res, ["0","1"]);
       projects = await fetchWithReferences(projects, "project");
     }
 
@@ -51,9 +52,9 @@ export const createProject = async (req: SessionRequest, res: Response) => {
         description: projectPlan.description,
         prompt: req.body.summary,
         userId: userId,
-      })as IProject & Document;
+      }) as IProject & Document;
       const projectId = project._id;
-      projectPlan.projectId = projectId
+      projectPlan.projectId = projectId;
 
       await Promise.all(
         projectPlan.resources.map(async (resource, rIndex) => {
@@ -63,7 +64,7 @@ export const createProject = async (req: SessionRequest, res: Response) => {
             title: resource.title,
             project: projectId,
             userId: userId,
-          })as IResource & Document;
+          }) as IResource & Document;
 
           await Promise.all(
             resource.epics.map(async (epic, eIndex) => {
@@ -74,7 +75,7 @@ export const createProject = async (req: SessionRequest, res: Response) => {
                 project: projectId,
                 userId: userId,
                 deleted: false,
-              })as IEpic & Document;
+              }) as IEpic & Document;
               epicIds.push(newEpic._id);
               resourceEpics.push(newEpic._id);
               (projectPlan.resources[rIndex].epics[eIndex] as any)._id =
@@ -97,7 +98,7 @@ export const createProject = async (req: SessionRequest, res: Response) => {
                   resourceTasks.push(newTask._id);
                   (
                     projectPlan.resources[rIndex].epics[eIndex].tasks[
-                    tIndex
+                      tIndex
                     ] as any
                   )._id = newTask._id;
 
@@ -143,6 +144,8 @@ export const getProject = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
+    validateParameter(req.params.id, "Project ID", ["required","string"], res);
+
     let project = await Project.findOne({ _id: req.params.id, userId: userId });
 
     if (!project) {
@@ -150,6 +153,7 @@ export const getProject = async (req: SessionRequest, res: Response) => {
     }
 
     if (req.query.fetch) {
+      validateParameter(req.params.fetch, "Fetch", ["inRange"], res, ["0","1"]);
       project = await fetchWithReferences(project, "project");
     }
 
@@ -168,7 +172,12 @@ export const deleteProject = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
-    const deleted = await Project.deleteOne({ _id: req.params.id, userId: userId });
+    validateParameter(req.params.id, "Project ID", ["required","string"], res);
+
+    const deleted = await Project.deleteOne({
+      _id: req.params.id,
+      userId: userId,
+    });
     console.log("Project deleted successfully");
     res.json(deleted);
   } catch (err) {
@@ -182,6 +191,8 @@ export const updateProject = async (req: SessionRequest, res: Response) => {
   if (userId === undefined) {
     res.status(401).send("Unauthorized");
   }
+
+  validateParameter(req.params.id, "Project ID", ["required","string"], res);
 
   try {
     const updatedData = {

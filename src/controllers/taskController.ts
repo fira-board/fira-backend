@@ -4,6 +4,7 @@ import Resource from "../models/resource";
 import Project from "../models/project";
 import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
+import { validateParameter } from "../utility/utils";
 
 export const listTasks = async (req: SessionRequest, res: Response) => {
   try {
@@ -23,10 +24,12 @@ export const listTasks = async (req: SessionRequest, res: Response) => {
     query.userId = userId;
 
     if (projectId) {
+      validateParameter(projectId, "Project ID", ["required","string"], res);
       query.project = projectId;
     }
 
     if (epicId) {
+      validateParameter(epicId, "Epic ID", ["required","string"], res);
       query.epic = epicId;
     }
 
@@ -48,14 +51,10 @@ export const createTask = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
-    // Cannot create task without epicId, resourceId, projectId
-    if (
-      req.body.epicId === undefined ||
-      req.body.resourceId === undefined ||
-      req.body.projectId === undefined
-    ) {
-      res.status(400).send("Prerequisite element ID required");
-    }
+    validateParameter(req.body.projectId, "Project ID", ["required","string"], res);
+    validateParameter(req.body.resourceId, "Project ID", ["required","string"], res);
+    validateParameter(req.body.epicId, "Project ID", ["required","string"], res);
+    validateParameter(req.body.title, "Project ID", ["required","string"], res);
 
     const newTask = await new Task({
       title: req.body.title,
@@ -95,6 +94,8 @@ export const getTask = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
+    validateParameter(req.params.id, "Task ID", ["required","string"], res);
+
     const task = await Task.findOne({
       _id: req.params.id,
       userId: userId,
@@ -117,6 +118,8 @@ export const deleteTask = async (req: SessionRequest, res: Response) => {
     if (userId === undefined) {
       res.status(401).send("Unauthorized");
     }
+
+    validateParameter(req.params.id, "Task ID", ["required","string"], res);
 
     const deleted = await Task.updateOne(
       { _id: req.params.id, userId: userId },
@@ -160,6 +163,9 @@ export const updateTask = async (req: SessionRequest, res: Response) => {
     if (userId === undefined) {
       res.status(401).send("Unauthorized");
     }
+
+    validateParameter(req.params.id, "Task ID", ["required","string"], res);
+    validateParameter(req.body.epic, "Epic ID", ["required","string"], res);
 
     const updatedData = {
       title: req.body.title,
