@@ -5,7 +5,7 @@ import taskRoutes from "./routes/taskRoutes";
 import epicRoutes from "./routes/epicRoutes";
 import resourceRoutes from "./routes/resourceRoutes";
 import feedbackRoutes from "./routes/feedbackRoutes";
-// import suggestionRoutes from "./routes/suggestionsRoutes";
+import suggestionRoutes from "./routes/suggestionsRoutes";
 
 import cors from "cors";
 
@@ -57,7 +57,7 @@ app.use("/tasks", taskRoutes);
 app.use("/epics", epicRoutes);
 app.use("/resources", resourceRoutes);
 app.use("/feedback", feedbackRoutes);
-// app.use("/suggestions", suggestionRoutes);
+app.use("/suggestions", suggestionRoutes);
 
 //session info
 app.get("/sessioninfo", verifySession(), async (req: SessionRequest, res) => {

@@ -4,7 +4,6 @@ import dotenv from "dotenv";
 
 import { createLanguageModel, createJsonTranslator } from "typechat";
 import { EpicSuggestions } from "./EpicSuggestionsSchema";
-import { ProjectPlan } from "../project/ProjectPlanSchema";
 import { IProject } from "../../types";
 
 // TODO: use local .env file.
@@ -19,13 +18,13 @@ const schema = fs.readFileSync(
 const translator = createJsonTranslator<EpicSuggestions>(
   model,
   schema,
-  "ProjectPlan"
+  "EpicSuggestions"
 );
 
 export const generateEpicSugestions = async (projectPlan: IProject,order: number, resourceName: String) => {
   try {
     const projectPlanString = JSON.stringify(projectPlan);
-    let prompt:string = `this is a Json object that represnts a project plan: ${projectPlanString}  \nSuggest three new epics for the resource ${resourceName} keep on mind there is chronological order for the epics and the tasks in each epic. the first epic is the first epic in the order and the suggested epuic order needs to be at numeber ${order}.`;
+    let prompt:string = `this is a Json object that represnts a project plan: ${projectPlanString}  \nSuggest three new epics and their tasks for the resource ${resourceName} keep on mind there is chronological order for the epics and the tasks in each epic. the first epic is the first epic in the order and the suggested epic order needs to be at numeber ${order}.`;
     
     const response = await translator.translate(prompt);
 
