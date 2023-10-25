@@ -2,7 +2,7 @@ import Resource from "../models/resource";
 import Project from "../models/project";
 import Epic from "../models/epic";
 import Task from "../models/task";
-import fetchWithReferences from "../utility/referenceMapping"
+import fetchWithReferences from "../utility/referenceMapping";
 import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
 import { validateParameter } from "../utility/utils";
@@ -21,12 +21,13 @@ export const listResources = async (req: SessionRequest, res: Response) => {
 
     query.userId = userId;
     query.project = projectId;
-    validateParameter(projectId, "Project ID", ["required","string"], res);
+    validateParameter(projectId, "Project ID", ["required", "string"], res);
 
     let resources = await Resource.find(query);
 
-    if (req.query.fetch) {
-      validateParameter(req.params.fetch, "Fetch", ["inRange"], res, ["0","1"]);
+    const fetch = Number(req.query.fetch);
+    if (fetch) {
+      validateParameter(fetch, "Fetch", ["inRange"], res, ["0", "1"]);
       resources = await fetchWithReferences(resources, "resource");
     }
 
@@ -38,15 +39,19 @@ export const listResources = async (req: SessionRequest, res: Response) => {
 
 export const createResource = async (req: SessionRequest, res: Response) => {
   try {
-
     const userId = req.session!.getUserId();
 
     if (userId === undefined) {
       res.status(401).send("Unauthorized");
     }
 
-    validateParameter(req.body.projectId, "Project ID", ["required","string"], res);
-    validateParameter(req.body.title, "Title", ["required","string"], res);
+    validateParameter(
+      req.body.projectId,
+      "Project ID",
+      ["required", "string"],
+      res
+    );
+    validateParameter(req.body.title, "Title", ["required", "string"], res);
 
     const newResource = new Resource({
       title: req.body.title,
@@ -68,7 +73,7 @@ export const createResource = async (req: SessionRequest, res: Response) => {
   }
 };
 
-export const listResource = async (req: SessionRequest, res: Response) => {
+export const getResource = async (req: SessionRequest, res: Response) => {
   try {
     const userId = req.session!.getUserId();
 
@@ -76,16 +81,24 @@ export const listResource = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
-    validateParameter(req.params.id, "Resource ID", ["required","string"], res);
+    validateParameter(
+      req.params.id,
+      "Resource ID",
+      ["required", "string"],
+      res
+    );
 
-    let resource = await Resource.findOne({ _id: req.params.id, userId: userId });
+    let resource = await Resource.findOne({
+      _id: req.params.id,
+      userId: userId,
+    });
 
     if (!resource) {
       return res.status(404).send("Resource not found");
     }
-
-    if (req.query.fetch) {
-      validateParameter(req.params.fetch, "Fetch", ["inRange"], res, ["0","1"]);
+    const fetch = Number(req.query.fetch);
+    if (fetch) {
+      validateParameter(fetch, "Fetch", ["inRange"], res, ["0", "1"]);
       resource = await fetchWithReferences(resource, "resource");
     }
 
@@ -104,9 +117,17 @@ export const deleteResource = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
-    validateParameter(req.params.id, "Resource ID", ["required","string"], res);
+    validateParameter(
+      req.params.id,
+      "Resource ID",
+      ["required", "string"],
+      res
+    );
 
-    const resource = await Resource.findOne({ _id: req.params.id, userId: userId });
+    const resource = await Resource.findOne({
+      _id: req.params.id,
+      userId: userId,
+    });
 
     if (!resource) {
       return res.status(404).send("Resource not found");
@@ -150,14 +171,23 @@ export const updateResource = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
-    validateParameter(req.params.id, "Resource ID", ["required","string"], res);
-    validateParameter(req.body.project, "Project ID", ["required","string"], res);
+    validateParameter(
+      req.params.id,
+      "Resource ID",
+      ["required", "string"],
+      res
+    );
+    validateParameter(
+      req.body.project,
+      "Project ID",
+      ["required", "string"],
+      res
+    );
 
     const updatedData = {
       title: req.body.title,
       epics: req.body.epics,
       project: req.body.project,
-
     };
     const updated = await Resource.updateOne(
       { _id: req.params.id, userId: userId },

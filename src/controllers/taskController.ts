@@ -24,12 +24,12 @@ export const listTasks = async (req: SessionRequest, res: Response) => {
     query.userId = userId;
 
     if (projectId) {
-      validateParameter(projectId, "Project ID", ["required","string"], res);
+      validateParameter(projectId, "Project ID", ["required", "string"], res);
       query.project = projectId;
     }
 
     if (epicId) {
-      validateParameter(epicId, "Epic ID", ["required","string"], res);
+      validateParameter(epicId, "Epic ID", ["required", "string"], res);
       query.epic = epicId;
     }
 
@@ -51,10 +51,30 @@ export const createTask = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
-    validateParameter(req.body.projectId, "Project ID", ["required","string"], res);
-    validateParameter(req.body.resourceId, "Project ID", ["required","string"], res);
-    validateParameter(req.body.epicId, "Project ID", ["required","string"], res);
-    validateParameter(req.body.title, "Project ID", ["required","string"], res);
+    validateParameter(
+      req.body.projectId,
+      "Project ID",
+      ["required", "string"],
+      res
+    );
+    validateParameter(
+      req.body.resourceId,
+      "Project ID",
+      ["required", "string"],
+      res
+    );
+    validateParameter(
+      req.body.epicId,
+      "Project ID",
+      ["required", "string"],
+      res
+    );
+    validateParameter(
+      req.body.title,
+      "Project ID",
+      ["required", "string"],
+      res
+    );
 
     const newTask = await new Task({
       title: req.body.title,
@@ -94,9 +114,9 @@ export const getTask = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
-    validateParameter(req.params.id, "Task ID", ["required","string"], res);
+    validateParameter(req.params.id, "Task ID", ["required", "string"], res);
 
-    const task = await Task.findOne({
+    let task = await Task.findOne({
       _id: req.params.id,
       userId: userId,
       deleted: false,
@@ -104,6 +124,7 @@ export const getTask = async (req: SessionRequest, res: Response) => {
     if (!task) {
       return res.status(404).send("Task not found or marked as deleted");
     }
+
     console.log("Task found");
     res.json(task);
   } catch (err) {
@@ -119,7 +140,7 @@ export const deleteTask = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
-    validateParameter(req.params.id, "Task ID", ["required","string"], res);
+    validateParameter(req.params.id, "Task ID", ["required", "string"], res);
 
     const deleted = await Task.updateOne(
       { _id: req.params.id, userId: userId },
@@ -164,8 +185,8 @@ export const updateTask = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
-    validateParameter(req.params.id, "Task ID", ["required","string"], res);
-    validateParameter(req.body.epic, "Epic ID", ["required","string"], res);
+    validateParameter(req.params.id, "Task ID", ["required", "string"], res);
+    validateParameter(req.body.epic, "Epic ID", ["required", "string"], res);
 
     const updatedData = {
       title: req.body.title,
@@ -178,7 +199,7 @@ export const updateTask = async (req: SessionRequest, res: Response) => {
       { _id: req.params.id, userId: userId },
       updatedData
     );
-    
+
     if (!updated) {
       return res.status(404).send("Task not found");
     }

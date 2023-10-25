@@ -20,8 +20,9 @@ export const listProjects = async (req: SessionRequest, res: Response) => {
 
     let projects = await Project.find({ userId: userId });
 
-    if (req.query.fetch) {
-      validateParameter(req.params.fetch, "Fetch", ["inRange"], res, ["0","1"]);
+    const fetch = Number(req.query.fetch);
+    if (fetch) {
+      validateParameter(fetch, "Fetch", ["inRange"], res, ["0", "1"]);
       projects = await fetchWithReferences(projects, "project");
     }
 
@@ -146,7 +147,7 @@ export const getProject = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
-    validateParameter(req.params.id, "Project ID", ["required","string"], res);
+    validateParameter(req.params.id, "Project ID", ["required", "string"], res);
 
     let project = await Project.findOne({ _id: req.params.id, userId: userId });
 
@@ -154,8 +155,9 @@ export const getProject = async (req: SessionRequest, res: Response) => {
       return res.status(404).send("Project not found");
     }
 
-    if (req.query.fetch) {
-      validateParameter(req.params.fetch, "Fetch", ["inRange"], res, ["0","1"]);
+    const fetch = Number(req.query.fetch);
+    if (fetch) {
+      validateParameter(fetch, "Fetch", ["inRange"], res, ["0", "1"]);
       project = await fetchWithReferences(project, "project");
     }
 
@@ -174,7 +176,7 @@ export const deleteProject = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
-    validateParameter(req.params.id, "Project ID", ["required","string"], res);
+    validateParameter(req.params.id, "Project ID", ["required", "string"], res);
 
     const deleted = await Project.deleteOne({
       _id: req.params.id,
@@ -194,7 +196,7 @@ export const updateProject = async (req: SessionRequest, res: Response) => {
     res.status(401).send("Unauthorized");
   }
 
-  validateParameter(req.params.id, "Project ID", ["required","string"], res);
+  validateParameter(req.params.id, "Project ID", ["required", "string"], res);
 
   try {
     const updatedData = {

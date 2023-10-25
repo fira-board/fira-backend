@@ -34,11 +34,9 @@ export const listEpics = async (req: SessionRequest, res: Response) => {
     query.deleted = false;
     let epics = await Epic.find(query);
 
-    if (req.query.fetch) {
-      validateParameter(req.params.fetch, "Fetch", ["inRange"], res, [
-        "0",
-        "1",
-      ]);
+    const fetch = Number(req.query.fetch);
+    if (fetch) {
+      validateParameter(fetch, "Fetch", ["inRange"], res, ["0", "1"]);
       epics = await fetchWithReferences(epics, "epic");
     }
 
@@ -119,11 +117,9 @@ export const listEpic = async (req: SessionRequest, res: Response) => {
       return res.status(404).send("Epic not found or marked as deleted");
     }
 
-    if (req.query.fetch) {
-      validateParameter(req.params.fetch, "Fetch", ["inRange"], res, [
-        "0",
-        "1",
-      ]);
+    const fetch = Number(req.query.fetch);
+    if (fetch) {
+      validateParameter(fetch, "Fetch", ["inRange"], res, ["0", "1"]);
       epic = await fetchWithReferences(epic, "epic");
     }
 
