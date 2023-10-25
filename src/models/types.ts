@@ -12,6 +12,7 @@ export interface ITask extends Document {
   epic: Ref<IEpic>;
   resource: Ref<IResource>;
   project: Ref<IProject>;
+  order: number;
 }
 
 export interface IEpic extends Document {
@@ -22,6 +23,7 @@ export interface IEpic extends Document {
   tasks: Ref<ITask>[];
   resource: Ref<IResource>;
   project: Ref<IProject>;
+  order: number;
 }
 
 export interface IResource extends Document {

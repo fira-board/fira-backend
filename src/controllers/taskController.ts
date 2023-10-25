@@ -172,6 +172,7 @@ export const updateTask = async (req: SessionRequest, res: Response) => {
       status: req.body.status,
       estimateDaysToFinish: req.body.estimateDaysToFinish,
       epic: req.body.epic,
+      order: req.body.order,
     };
     const updated = await Task.updateOne(
       { _id: req.params.id, userId: userId },

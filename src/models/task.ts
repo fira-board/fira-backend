@@ -22,6 +22,7 @@ const TaskSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "project",
   },
+  order: Number,
 });
 
 const Task = mongoose.model<ITask>("task", TaskSchema);

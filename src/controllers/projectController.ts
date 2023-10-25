@@ -75,6 +75,7 @@ export const createProject = async (req: SessionRequest, res: Response) => {
                 project: projectId,
                 userId: userId,
                 deleted: false,
+                order: epic.order,
               }) as IEpic & Document;
               epicIds.push(newEpic._id);
               resourceEpics.push(newEpic._id);
@@ -92,6 +93,7 @@ export const createProject = async (req: SessionRequest, res: Response) => {
                     resource: newResource._id,
                     project: projectId,
                     deleted: false,
+                    order: task.order,
                   }) as ITask & Document;
                   taskIds.push(newTask._id);
                   epicTasks.push(newTask._id);

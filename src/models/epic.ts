@@ -23,6 +23,7 @@ const EpicSchema = new mongoose.Schema<IEpic>({
     type: mongoose.Schema.Types.ObjectId,
     ref: "project",
   },
+  order: Number,
 });
 
 const Epic = mongoose.model<IEpic>("epic", EpicSchema);

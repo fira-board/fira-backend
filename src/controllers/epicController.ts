@@ -217,6 +217,7 @@ export const updateEpic = async (req: SessionRequest, res: Response) => {
       status: req.body.status,
       resource: req.body.resourceId,
       tasks: req.body.tasks,
+      order: req.body.order,
       userId: userId,
     };
     const updated = await Epic.updateOne({ _id: req.params.id }, updatedData);
