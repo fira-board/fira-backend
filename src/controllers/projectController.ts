@@ -10,6 +10,7 @@ import { SessionRequest } from "supertokens-node/framework/express";
 import { Types, Document } from "mongoose";
 import { validateParameter } from "../utility/utils";
 
+
 export const listProjects = async (req: SessionRequest, res: Response) => {
   try {
     const userId = req.session!.getUserId();

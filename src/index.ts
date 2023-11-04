@@ -76,13 +76,6 @@ process.on("unhandledRejection", (reason, promise) => {
   console.error("Unhandled Rejection at:", promise, "reason:", reason);
 });
 
-function customErrorHandler(err: any, req: express.Request, res: express.Response) {
-  console.error(req.url);
-  console.error(err.stack);
-  res.status(500).send("Something broke!");
-}
-
-app.use(customErrorHandler);
 
 //init server
 app.listen(PORT, () => {
