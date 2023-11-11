@@ -11,7 +11,7 @@ import cors from "cors";
 
 import supertokens from "supertokens-node";
 import { verifySession } from "supertokens-node/recipe/session/framework/express";
-import { middleware, errorHandler, SessionRequest } from "supertokens-node/framework/express";
+import { middleware, SessionRequest } from "supertokens-node/framework/express";
 import { getWebsiteDomain, SuperTokensConfig } from "./config";
 
 
@@ -68,14 +68,6 @@ app.get("/sessioninfo", verifySession(), async (req: SessionRequest, res) => {
     accessTokenPayload: session!.getAccessTokenPayload(),
   });
 });
-
-//Error handling
-app.use(errorHandler());
-
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("Unhandled Rejection at:", promise, "reason:", reason);
-});
-
 
 //init server
 app.listen(PORT, () => {

@@ -15,7 +15,7 @@ const checkUserTokens = async (req: SessionRequest, res: Response, next: NextFun
     const userId = req.session!.getUserId(); // Assuming you're getting the user ID from the session
 
     try {
-        const user = await UserData.findOne({ id: userId });
+        const user = await UserData.findOne({ userId: userId });
         
         if (!user) {
             return res.status(404).send('User not found');
@@ -37,7 +37,7 @@ const subtractUserTokens = (tokensToSubtract: number) => {
         const userId = req.session!.getUserId(); // Assuming you're getting the user ID from the session
 
         try {
-            const user = await UserData.findOne({ id: userId });
+            const user = await UserData.findOne({ userId: userId });
 
             if (!user) {
                 return res.status(404).send('User not found');

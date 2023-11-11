@@ -44,7 +44,7 @@ export const SuperTokensConfig: TypeInput = {
                         const response = await originalImplementation.signUp(input);
 
                         if (response.status === "OK") {
-                            new UserData({ id: response.user.id, allowedTokens: 4000, consumedTokens: 0 }).save();
+                            new UserData({ userId: response.user.id, allowedTokens: 4000, consumedTokens: 0 }).save();
 
                         } else if (response.status === "EMAIL_ALREADY_EXISTS_ERROR") {
                             // Handle the error case

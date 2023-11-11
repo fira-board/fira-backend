@@ -30,6 +30,7 @@ export const generateProjectPlan = async (summary: String) => {
       console.debug(response.message);
       throw new Error(response.message);
     }
+    console.log(response);
     return response.data;
   } catch (error) {
     console.error("Error in generateProjectPlan:", (error as any).message);
