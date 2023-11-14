@@ -148,9 +148,9 @@ export const getProject = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
-    validateParameter(req.params.id, "Project ID", ["required", "string"], res);
+    validateParameter(req.params.projectId, "Project ID", ["required", "string"], res);
 
-    let project = await Project.findOne({ _id: req.params.id, userId: userId });
+    let project = await Project.findOne({ _id: req.params.projectId, userId: userId });
 
     if (!project) {
       return res.status(404).send("Project not found");
@@ -177,10 +177,10 @@ export const deleteProject = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
-    validateParameter(req.params.id, "Project ID", ["required", "string"], res);
+    validateParameter(req.params.projectId, "Project ID", ["required", "string"], res);
 
     const deleted = await Project.deleteOne({
-      _id: req.params.id,
+      _id: req.params.projectId,
       userId: userId,
     });
     console.log("Project deleted successfully");
@@ -197,7 +197,7 @@ export const updateProject = async (req: SessionRequest, res: Response) => {
     res.status(401).send("Unauthorized");
   }
 
-  validateParameter(req.params.id, "Project ID", ["required", "string"], res);
+  validateParameter(req.params.projectId, "Project ID", ["required", "string"], res);
 
   try {
     const updatedData = {
@@ -207,7 +207,7 @@ export const updateProject = async (req: SessionRequest, res: Response) => {
       resources: req.body.resources,
     };
     const updated = await Project.updateOne(
-      { _id: req.params.id, userId: userId },
+      { _id: req.params.projectId, userId: userId },
       updatedData
     );
 
