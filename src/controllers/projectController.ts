@@ -9,6 +9,7 @@ import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
 import { Types, Document } from "mongoose";
 import { validateParameter } from "../utility/utils";
+import ProjectUserRoles from "../models/ProjectUserRoles";
 
 
 export const listProjects = async (req: SessionRequest, res: Response) => {
@@ -131,6 +132,7 @@ export const createProject = async (req: SessionRequest, res: Response) => {
       project.epics = epicIds;
       project.tasks = taskIds;
       await project.save();
+      await ProjectUserRoles.create({userId:userId,projectId:project.id,role:3});
 
       return res.json(projectPlan);
     }
