@@ -6,23 +6,23 @@ import UserData from "./models/userData";
 
 export function getApiDomain() {
     const apiPort = process.env.PORT || 3001;
-    const apiUrl = process.env.REACT_APP_API_URL || `http://localhost:${apiPort}`;
+    const apiUrl = process.env.API_URL + ':' + apiPort || `http://localhost:${apiPort}`;
     return apiUrl;
 }
 
 export function getWebsiteDomain() {
-    const websitePort = process.env.REACT_APP_WEBSITE_PORT || 3000;
-    const websiteUrl = process.env.REACT_APP_WEBSITE_URL || `http://localhost:${websitePort}`;
+    const websitePort = process.env.WEBSITE_PORT || 3000;
+    const websiteUrl = process.env.WEBSITE_URL || `http://localhost:${websitePort}`;
     return websiteUrl;
 }
 
 export const SuperTokensConfig: TypeInput = {
     supertokens: {
         // this is the location of the SuperTokens core.
-        connectionURI: "https://try.supertokens.com",
+        connectionURI: process.env.SUPER_TOKENS_CORE_URL || "https://try.supertokens.io",
     },
     appInfo: {
-        appName: "Fira",
+        appName: process.env.APP_NAME || "Fira",
         apiDomain: getApiDomain(),
         websiteDomain: getWebsiteDomain(),
     },

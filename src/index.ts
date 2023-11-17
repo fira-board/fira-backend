@@ -10,8 +10,7 @@ import suggestionRoutes from "./routes/suggestionsRoutes";
 import cors from "cors";
 
 import supertokens from "supertokens-node";
-import { verifySession } from "supertokens-node/recipe/session/framework/express";
-import { middleware, SessionRequest } from "supertokens-node/framework/express";
+import { middleware } from "supertokens-node/framework/express";
 import { getWebsiteDomain, SuperTokensConfig } from "./config";
 
 
@@ -53,21 +52,12 @@ mongoose.connect(MONGO_URI);
 //routes
 app.use(express.json());
 app.use("/projects", projectRoutes);
-app.use("/projects/:projectId/tasks", taskRoutes);
-app.use("/projects/:projectId/epics", epicRoutes);
 app.use("/projects/:projectId/resources", resourceRoutes);
+app.use("/projects/:projectId/epics", epicRoutes);
+app.use("/projects/:projectId/tasks", taskRoutes);
+app.use("/projects/:projectId/suggestions", suggestionRoutes);
 app.use("/feedback", feedbackRoutes);
-app.use("/suggestions", suggestionRoutes);
 
-//session info
-app.get("/sessioninfo", verifySession(), async (req: SessionRequest, res) => {
-  let session = req.session;
-  res.send({
-    sessionHandle: session!.getHandle(),
-    userId: session!.getUserId(),
-    accessTokenPayload: session!.getAccessTokenPayload(),
-  });
-});
 
 //init server
 app.listen(PORT, () => {

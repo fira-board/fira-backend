@@ -1,5 +1,21 @@
 import mongoose from "mongoose";
-import { IEpic } from "./types";
+import { Document, Types } from "mongoose";
+import { IResource } from "./resource";
+import { IProject } from "./project";
+import { ITask } from "./task";
+
+type Ref<T extends Document> = T | Types.ObjectId;
+
+export interface IEpic extends Document {
+  title: string;
+  userId: string;
+  status: "Not Started" | "In Progress" | "Completed";
+  deleted: boolean;
+  tasks: Ref<ITask>[];
+  resource: Ref<IResource>;
+  project: Ref<IProject>;
+  order: number;
+}
 
 const EpicSchema = new mongoose.Schema<IEpic>({
   title: String,

@@ -1,8 +1,13 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Types } from 'mongoose';
+import { IProject } from './project';
+
+
+// The type Ref<T> is either an ObjectId or the full type T
+type Ref<T extends Document> = T | Types.ObjectId;
 
 interface IProjectUserRoles extends Document {
-    projectId: typeof Schema.Types.ObjectId;
-    userId: typeof Schema.Types.ObjectId;
+    projectId: Ref<IProject>;
+    userId: String;
     role: number;
 }
 
@@ -10,12 +15,11 @@ const projectUserRolesSchema: Schema = new Schema({
     projectId: {
         type: Schema.Types.ObjectId,
         required: true,
-        ref: 'Project' // Assuming you have a Project model
+        ref: 'project' // Assuming you have a Project model
     },
     userId: {
-        type: Schema.Types.ObjectId,
-        required: true,
-        ref: 'User' // Assuming you have a User model
+        type: String,
+        required: true
     },
     role: {
         type: Number,

@@ -9,7 +9,7 @@ import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
 import { Types, Document } from "mongoose";
 import { validateParameter } from "../utility/utils";
-import ProjectUserRoles from "../models/ProjectUserRoles";
+import ProjectUserRoles from "../models/projectUserRoles";
 
 
 export const listProjects = async (req: SessionRequest, res: Response) => {
@@ -20,7 +20,13 @@ export const listProjects = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
-    let projects = await Project.find({ userId: userId });
+    const projectIds = await ProjectUserRoles.find({ userId: userId }).then((userRoles) => {
+      return userRoles.map((userRole) => {
+        return userRole.projectId;
+      })
+    });
+
+    let projects = await Project.find({ _id: { $in: projectIds } });
 
     const fetch = Number(req.query.fetch);
     if (fetch) {
@@ -42,7 +48,7 @@ export const createProject = async (req: SessionRequest, res: Response) => {
       res.status(401).send("Unauthorized");
     }
 
-    if (req.params.empty) {
+    if (req.query.empty) {
       res.status(201).send(await new Project(req.body).save());
     } else {
       let projectPlan = await generateProjectPlan(req.body.summary);
@@ -103,7 +109,7 @@ export const createProject = async (req: SessionRequest, res: Response) => {
                   resourceTasks.push(newTask._id);
                   (
                     projectPlan.resources[rIndex].epics[eIndex].tasks[
-                      tIndex
+                    tIndex
                     ] as any
                   )._id = newTask._id;
 
@@ -132,7 +138,7 @@ export const createProject = async (req: SessionRequest, res: Response) => {
       project.epics = epicIds;
       project.tasks = taskIds;
       await project.save();
-      await ProjectUserRoles.create({userId:userId,projectId:project.id,role:3});
+      await ProjectUserRoles.create({ userId: userId, projectId: project.id, role: 3 });
 
       return res.json(projectPlan);
     }

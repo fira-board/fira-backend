@@ -1,25 +1,25 @@
 import mongoose from "mongoose";
-import { IResource } from "./types";
+import { Document } from 'mongoose';
+
+export interface IResource extends Document {
+  title: string;
+  userId: string;
+}
 
 const ResourceSchema = new mongoose.Schema({
-  title: String,
-  userId:String,
-  project: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "project",
+  title: {
+    type: String, required: true, validate: {
+      validator: function (name: string) {
+        // Regular expression for title validation contains letters,numbers and - , and it has a max of 20 characters
+        return /^[a-zA-Z0-9-]{1,20}$/.test(name);
+      },
+      message: (props: any) => `${props.value} is not a valid title!`,
+    }
   },
-  tasks: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "task",
-    },
-  ],
-  epics: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "resource",
-    },
-  ],
+  userId: {
+    type: String,
+    required: true,
+  },
 });
 
 const Resource = mongoose.model<IResource>("resource", ResourceSchema);
