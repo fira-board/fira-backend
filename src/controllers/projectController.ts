@@ -3,13 +3,13 @@ import Task from "../models/task";
 import Epic from "../models/epic";
 import Resource from "../models/resource";
 import fetchWithReferences from "../utility/referenceMapping";
-import { IProject, IResource, IEpic, ITask } from "../models/types";
 import { generateProjectPlan } from "../models/ai/project/ProjectPlanGenerator";
 import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
 import { Types, Document } from "mongoose";
 import { validateParameter } from "../utility/utils";
 import ProjectUserRoles from "../models/projectUserRoles";
+
 
 
 export const listProjects = async (req: SessionRequest, res: Response) => {
@@ -51,7 +51,11 @@ export const createProject = async (req: SessionRequest, res: Response) => {
     if (req.query.empty) {
       res.status(201).send(await new Project(req.body).save());
     } else {
+
       let projectPlan = await generateProjectPlan(req.body.summary);
+
+
+
       let resourceIds: Types.ObjectId[] = [];
       let epicIds: Types.ObjectId[] = [];
       let taskIds: Types.ObjectId[] = [];

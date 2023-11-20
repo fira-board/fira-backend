@@ -8,7 +8,7 @@ type Ref<T extends Document> = T | Types.ObjectId;
 
 
 export interface IProject extends Document {
-  projectName: string;
+  name: string;
   description?: string;
   prompt?: string;
   userId: string;

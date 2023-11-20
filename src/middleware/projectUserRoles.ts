@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { SessionRequest } from "supertokens-node/framework/express";
-import ProjectUserRoles from "../models/ProjectUserRoles";
+import ProjectUserRoles from "../models/projectUserRoles";
 
 function checkPermissions(requiredRole: number) {
   return async (req: SessionRequest, res: Response, next: NextFunction) => {

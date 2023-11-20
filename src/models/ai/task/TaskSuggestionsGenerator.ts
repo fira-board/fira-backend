@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 
 import { createLanguageModel, createJsonTranslator } from "typechat";
 import { TaskSuggestions } from "./TaskSuggestionsSchema";
-import { IProject } from '../../types';
+import { IProject } from "../../../models/project";
 
 // TODO: use local .env file.
 dotenv.config({ path: path.join(__dirname, "../../../.env") });

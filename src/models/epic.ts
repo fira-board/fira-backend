@@ -8,8 +8,8 @@ type Ref<T extends Document> = T | Types.ObjectId;
 
 export interface IEpic extends Document {
   title: string;
-  userId: string;
   status: "Not Started" | "In Progress" | "Completed";
+  userId: string;
   deleted: boolean;
   tasks: Ref<ITask>[];
   resource: Ref<IResource>;
@@ -19,11 +19,19 @@ export interface IEpic extends Document {
 
 const EpicSchema = new mongoose.Schema<IEpic>({
   title: String,
-  status: String,
+
+  status: {
+    type: String,
+    enum: ["Not Started", "In Progress", "Completed"],
+    default: "Not Started",
+    required: true,
+  },
+
   userId: String,
   deleted: {
     type: Boolean,
     default: false,
+    required: true,
   },
   resource: {
     type: mongoose.Schema.Types.ObjectId,

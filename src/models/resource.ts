@@ -2,8 +2,8 @@ import mongoose from "mongoose";
 import { Document } from 'mongoose';
 
 export interface IResource extends Document {
-  title: string;
-  userId: string;
+  title: String;
+  userId: String;
 }
 
 const ResourceSchema = new mongoose.Schema({

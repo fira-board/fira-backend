@@ -27,6 +27,7 @@ export const generateProjectPlan = async (summary: String) => {
     const response = await translator.translate(prompt);
 
     if (!response.success) {
+      console.log(response);
       console.debug(response.message);
       throw new Error(response.message);
     }
@@ -37,3 +38,22 @@ export const generateProjectPlan = async (summary: String) => {
     throw error;
   }
 };
+
+
+// // Testing code :
+function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+ }
+async function run(tasks: any) {
+  console.log('Waiting for 10 seconds...');
+  
+  await delay(60000);
+
+  console.log('10 seconds have passed!');
+  console.log(tasks);
+}
+
+const tasks =  generateProjectPlan('I want to start a company in Dubai.');
+run(tasks);
+
+console.log('This will run before the 10 seconds delay!');
