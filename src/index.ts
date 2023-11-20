@@ -52,7 +52,7 @@ mongoose.connect(MONGO_URI);
 //routes
 app.use(express.json());
 app.use("/projects", projectRoutes);
-app.use("/projects/:projectId/resources", resourceRoutes);
+app.use("/resources", resourceRoutes);
 app.use("/projects/:projectId/epics", epicRoutes);
 app.use("/projects/:projectId/tasks", taskRoutes);
 app.use("/projects/:projectId/suggestions", suggestionRoutes);

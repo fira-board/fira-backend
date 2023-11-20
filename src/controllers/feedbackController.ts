@@ -8,31 +8,20 @@ import Task from "../models/task";
 
 
 export const createFeedback = async (req: SessionRequest, res: Response) => {
-    try {
-        const userId = req.session!.getUserId();
+    const userId = req.session!.getUserId();
+    const epic = await Epic.findById(req.body.epicId);
+    const tasks = Task.find({ epic: req.body.epicId });
 
-        if (userId === undefined) {
-            res.status(401).send("Unauthorized");
-        }
+    const newFeedback = await new Feedback({
+        suggestion: req.body.suggestion,
+        status: req.body.status,
+        userId: userId,
+        epic: epic,
+        tasks: tasks,
+        project: epic?.project,
+    });
 
-        const epic = await Epic.findById(req.body.epicId);
-
-
-        const tasks = Task.find({ epic: req.body.epicId });
-
-        const newFeedback = await new Feedback({
-            suggestion: req.body.suggestion,
-            status: req.body.status,
-            userId: userId,
-            epic: epic,
-            tasks: tasks,
-            project: epic?.project,
-        });
-
-        await newFeedback.save();
-        res.json("sucessfully added feedback");
-    } catch (err) {
-        res.status(500).send(err);
-    }
+    await newFeedback.save();
+    res.json("sucessfully added feedback");
 }
 

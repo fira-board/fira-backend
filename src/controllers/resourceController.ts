@@ -1,206 +1,45 @@
 import Resource from "../models/resource";
-import Project from "../models/project";
-import Epic from "../models/epic";
-import Task from "../models/task";
-import fetchWithReferences from "../utility/referenceMapping";
 import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
-import { validateParameter } from "../utility/utils";
 
 export const listResources = async (req: SessionRequest, res: Response) => {
-  try {
-    const userId = req.session!.getUserId();
+  const query = req.params.query || "";  // default to empty query;
+  const page = Number(req.query.page) || 0; // default to first page
+  const pageSize = Number(req.query.pageSize) || 10; // default to 10 items per page
 
-    if (userId === undefined) {
-      res.status(401).send("Unauthorized");
-    }
+  //search for resource by title where the title starts with the query
+  let resources = await Resource.find({ title: { $regex: `^${query}`, $options: "i" } }, null, { skip: page * pageSize, limit: pageSize }).lean();
 
-    const { projectId } = req.query;
-
-    const query: any = {};
-
-    query.userId = userId;
-    query.project = projectId;
-    validateParameter(projectId, "Project ID", ["required", "string"], res);
-
-    let resources = await Resource.find(query);
-
-    const fetch = Number(req.query.fetch);
-    if (fetch) {
-      validateParameter(fetch, "Fetch", ["inRange"], res, ["0", "1"]);
-      resources = await fetchWithReferences(resources, "resource");
-    }
-
-    res.json(resources);
-  } catch (err) {
-    res.status(500).send(err);
-  }
+  console.debug("Resources search");
+  res.json(resources);
 };
 
-export const createResource = async (req: SessionRequest, res: Response) => {
-  try {
-    const userId = req.session!.getUserId();
-
-    if (userId === undefined) {
-      res.status(401).send("Unauthorized");
-    }
-
-    validateParameter(
-      req.body.projectId,
-      "Project ID",
-      ["required", "string"],
-      res
-    );
-    validateParameter(req.body.title, "Title", ["required", "string"], res);
-
-    const newResource = new Resource({
-      title: req.body.title,
-      project: req.body.projectId,
-      userId: userId,
-    });
-
-    await newResource.save();
-
-    if (req.body.projectId) {
-      await Project.findByIdAndUpdate(req.body.projectId, {
-        $push: { resources: newResource._id },
-      });
-    }
-
-    res.json(newResource._id);
-  } catch (err) {
-    res.status(500).send(err);
-  }
-};
 
 export const getResource = async (req: SessionRequest, res: Response) => {
-  try {
-    const userId = req.session!.getUserId();
+  let resource = await Resource.findOne({
+    _id: req.params.id,
+  });
 
-    if (userId === undefined) {
-      res.status(401).send("Unauthorized");
-    }
-
-    validateParameter(
-      req.params.id,
-      "Resource ID",
-      ["required", "string"],
-      res
-    );
-
-    let resource = await Resource.findOne({
-      _id: req.params.id,
-      userId: userId,
-    });
-
-    if (!resource) {
-      return res.status(404).send("Resource not found");
-    }
-    const fetch = Number(req.query.fetch);
-    if (fetch) {
-      validateParameter(fetch, "Fetch", ["inRange"], res, ["0", "1"]);
-      resource = await fetchWithReferences(resource, "resource");
-    }
-
-    console.log("Resource found");
-    res.json(resource);
-  } catch (err) {
-    res.status(500).send(err);
+  if (!resource) {
+    return res.status(404).send("Resource not found");
   }
+
+  console.debug("Resource found");
+  res.json(resource);
 };
 
-export const deleteResource = async (req: SessionRequest, res: Response) => {
-  try {
-    const userId = req.session!.getUserId();
 
-    if (userId === undefined) {
-      res.status(401).send("Unauthorized");
-    }
+export const createResource = async (req: SessionRequest, res: Response) => {
+  const userId = req.session!.getUserId();
 
-    validateParameter(
-      req.params.id,
-      "Resource ID",
-      ["required", "string"],
-      res
-    );
+  const newResource = new Resource({
+    title: req.body.title,
+    project: req.body.projectId,
+    userId: userId,
+  });
 
-    const resource = await Resource.findOne({
-      _id: req.params.id,
-      userId: userId,
-    });
+  await newResource.save();
 
-    if (!resource) {
-      return res.status(404).send("Resource not found");
-    }
-
-    // Mark epics and their tasks as deleted
-    if (resource.epics.length) {
-      await Epic.updateMany(
-        { _id: { $in: resource.epics } },
-        { deleted: true }
-      );
-      await Task.updateMany(
-        { _id: { $in: resource.tasks } },
-        { deleted: true }
-      );
-    }
-
-    // Remove epics and ids from project
-    if (resource.project) {
-      await Project.findByIdAndUpdate(resource.project, {
-        $pull: {
-          epics: { $in: resource.epics },
-          tasks: { $in: resource.tasks },
-          resources: req.params.id,
-        },
-      });
-    }
-
-    await Resource.deleteOne({ _id: req.params.id });
-    res.json({ message: "Resource deleted" });
-  } catch (err) {
-    res.status(500).send(err);
-  }
-};
-
-export const updateResource = async (req: SessionRequest, res: Response) => {
-  try {
-    const userId = req.session!.getUserId();
-
-    if (userId === undefined) {
-      res.status(401).send("Unauthorized");
-    }
-
-    validateParameter(
-      req.params.id,
-      "Resource ID",
-      ["required", "string"],
-      res
-    );
-    validateParameter(
-      req.body.project,
-      "Project ID",
-      ["required", "string"],
-      res
-    );
-
-    const updatedData = {
-      title: req.body.title,
-      epics: req.body.epics,
-      project: req.body.project,
-    };
-    const updated = await Resource.updateOne(
-      { _id: req.params.id, userId: userId },
-      updatedData
-    );
-
-    if (!updated) {
-      return res.status(404).send("Resource not found");
-    }
-
-    console.log("Resource updated successfully");
-    res.json(updated);
-  } catch (err) {
-    res.status(500).send(err);
-  }
+  console.debug("Resource created successfully");
+  res.json(newResource._id);
 };

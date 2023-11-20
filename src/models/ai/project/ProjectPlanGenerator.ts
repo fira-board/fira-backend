@@ -21,7 +21,7 @@ const translator = createJsonTranslator<ProjectPlan>(
 
 export const generateProjectPlan = async (summary: String) => {
   const prompt = summary.concat(
-    " be detailed as much as possible to get the best results. each plan need to have at least six epics and three tasks for each at least for each epic."
+    " be detailed as much as possible to get the best results. each plan need to have at least six epics and three tasks for each epic."
   );
   const response = await translator.translate(prompt);
 

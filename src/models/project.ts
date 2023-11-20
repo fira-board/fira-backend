@@ -1,8 +1,6 @@
 import mongoose from "mongoose";
 import { Document, Types } from "mongoose";
 import { IResource } from "./resource";
-import { IEpic } from "./epic";
-import { ITask } from "./task";
 
 type Ref<T extends Document> = T | Types.ObjectId;
 
@@ -13,8 +11,6 @@ export interface IProject extends Document {
   prompt?: string;
   userId: string;
   resources: Ref<IResource>[];
-  epics: Ref<IEpic>[];
-  tasks: Ref<ITask>[];
 }
 
 const ProjectSchema = new mongoose.Schema({
@@ -46,18 +42,6 @@ const ProjectSchema = new mongoose.Schema({
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "resource",
-    },
-  ],
-  epics: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "epic",
-    },
-  ],
-  tasks: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "task",
     },
   ],
 });
