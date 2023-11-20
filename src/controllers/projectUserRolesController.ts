@@ -1,8 +1,7 @@
 import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
-import ProjectUserRoles from "../models/ProjectUserRoles";
-import { getUserByEmail } from "supertokens-node/recipe/emailpassword";
-import { TypeEmailPasswordUser } from "supertokens-node/recipe/emailpassword/types";
+import ProjectUserRoles from "../models/projectUserRoles";
+import supertokens from "supertokens-node";
 
 export const getUserRoles = async (req: SessionRequest, res: Response) => {
   try {
@@ -30,16 +29,18 @@ export const deleteUserRoles = async (req: SessionRequest, res: Response) => {
 export const addUserRoles = async (req: SessionRequest, res: Response) => {
   try {
     const roles = req.body.roles;
-    roles.array.forEach((userRole) => {
-      const user: TypeEmailPasswordUser | undefined = await getUserByEmail(
-        email
-      );
 
-      if (user) {
-        const userRoles = await ProjectUserRoles.create({
+    roles.array.forEach(async (role: any) => {
+
+      let usersInfo = await supertokens.listUsersByAccountInfo("public", {
+        email: role.email,
+      });
+
+      if (usersInfo.length > 0) {
+        await ProjectUserRoles.create({
           projectId: req.params.projectId,
-          userId: user.id,
-          role: userRole.role,
+          userId: usersInfo[0].id,
+          role: role.role,
         });
       } else {
         // TODO: send email invite
