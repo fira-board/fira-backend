@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import dotenv from "dotenv";
 
-import { createLanguageModel, createJsonTranslator } from "typechat";
+import { createLanguageModel, createJsonTranslator } from "fira-board-typechat";
 import { TaskSuggestions } from "./TaskSuggestionsSchema";
 import { IProject } from "../../../models/project";
 
@@ -22,7 +22,6 @@ const translator = createJsonTranslator<TaskSuggestions>(
 );
 
 export const generateTaskSugestions = async (projectPlan: IProject,order: number, epicName: String) => {
-  try {
     const projectPlanString = JSON.stringify(projectPlan);
     let prompt:string = `this is a Json object that represnts a project plan: ${projectPlanString}  \nSuggest three new useful tasks to complete the epic goal, the epic name is (${epicName}). Keep on mind there is chronological order for the tasks in the epic. the first task is the first task in the order and the suggested task order needs to be at numeber ${order}.`;
     
@@ -31,11 +30,7 @@ export const generateTaskSugestions = async (projectPlan: IProject,order: number
     if (!response.success) {
       throw new Error(response.message);
     }
-    return response.data;
-  } catch (error) {
-    console.error("Error in generateProjectPlan:", (error as any).message);
-    throw error;
-  }
+    return response;
 };
 
 // // Testing code :

@@ -16,14 +16,14 @@ const checkUserTokens = async (req: SessionRequest, res: Response, next: NextFun
 
     try {
         const user = await UserData.findOne({ userId: userId });
-        
+
         if (!user) {
             return res.status(404).send('User not found');
         }
-        
+
         // Add the 'model' property to the request object
         req.model = user.allowedTokens > 0 ? 'GPT-4' : 'GPT-3';
-        
+
         next();
     } catch (error) {
         console.error(error);
@@ -32,27 +32,29 @@ const checkUserTokens = async (req: SessionRequest, res: Response, next: NextFun
 };
 
 // Middleware to subtract tokens from the user
-const subtractUserTokens = (tokensToSubtract: number) => {
-    return async (req: SessionRequest, res: Response, next: NextFunction) => {
-        const userId = req.session!.getUserId(); // Assuming you're getting the user ID from the session
+const subtractUserTokens = async (req: SessionRequest, res: Response, next: NextFunction) => {
+    const userId = req.session!.getUserId(); // Assuming you're getting the user ID from the session
 
-        try {
-            const user = await UserData.findOne({ userId: userId });
+    try {
+        const user = await UserData.findOne({ userId: userId });
 
-            if (!user) {
-                return res.status(404).send('User not found');
-            }
-
-            user.consumedTokens += tokensToSubtract;
-            user.allowedTokens -= tokensToSubtract;
-            await user.save();
-
-            next();
-        } catch (error) {
-            console.error(error);
-            res.status(500).send('Server error');
+        if (!user) {
+            return res.status(404).send('User not found');
         }
-    };
+        const usageHeader = res.getHeader('usage');
+        if (!usageHeader)
+            next();
+
+        const usage = JSON.parse(usageHeader as string);
+        user.consumedTokens += usage.totalTokens;
+        user.allowedTokens -= usage.totalTokens;
+        await user.save();
+
+        next();
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server error');
+    }
 };
 
 

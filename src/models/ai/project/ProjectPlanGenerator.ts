@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import dotenv from "dotenv";
 
-import { createLanguageModel, createJsonTranslator } from "typechat";
+import { createLanguageModel, createJsonTranslator } from "fira-board-typechat";
 import { ProjectPlan } from "./ProjectPlanSchema";
 
 // TODO: use local .env file.
@@ -20,40 +20,33 @@ const translator = createJsonTranslator<ProjectPlan>(
 );
 
 export const generateProjectPlan = async (summary: String) => {
-  try {
-    const prompt = summary.concat(
-      " be detailed as much as possible to get the best results. each plan need to have at least six epics and three tasks for each at least for each epic."
-    );
-    const response = await translator.translate(prompt);
+  const prompt = summary.concat(
+    " be detailed as much as possible to get the best results. each plan need to have at least six epics and three tasks for each at least for each epic."
+  );
+  const response = await translator.translate(prompt);
 
-    if (!response.success) {
-      console.log(response);
-      console.debug(response.message);
-      throw new Error(response.message);
-    }
-    console.log(response);
-    return response.data;
-  } catch (error) {
-    console.error("Error in generateProjectPlan:", (error as any).message);
-    throw error;
+  if (!response.success) {
+    throw new Error(response.message);
   }
+
+  return response;
 };
 
 
-// // Testing code :
-function delay(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
- }
-async function run(tasks: any) {
-  console.log('Waiting for 10 seconds...');
-  
-  await delay(60000);
+// // // Testing code :
+// function delay(ms: number) {
+//   return new Promise(resolve => setTimeout(resolve, ms));
+// }
+// async function run(tasks: any) {
+//   console.log('Waiting for 10 seconds...');
 
-  console.log('10 seconds have passed!');
-  console.log(tasks);
-}
+//   await delay(60000);
 
-const tasks =  generateProjectPlan('I want to start a company in Dubai.');
-run(tasks);
+//   console.log('10 seconds have passed!');
+//   console.log(tasks);
+// }
 
-console.log('This will run before the 10 seconds delay!');
+// const tasks = generateProjectPlan('I want to start a company in Dubai.');
+// run(tasks);
+
+// console.log('This will run before the 10 seconds delay!');

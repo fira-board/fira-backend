@@ -22,7 +22,9 @@ export const suggestNewEpic = async (req: SessionRequest, res: Response) => {
         const resource = await Resource.findById({ _id: resourceId, owner: userId });
 
         if (project && resource) {
-            res.send(await generateEpicSugestions(project, Number(order), resource.title));
+            const response = await generateEpicSugestions(project, Number(order), resource.title);
+            res.header("usage", response.usage);
+            res.send(response.data);
 
         } else {
             res.status(400).send("Unauthorized");

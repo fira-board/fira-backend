@@ -20,7 +20,7 @@
     "mongoose": "^8.0.1",
     "supertokens-node": "^16.5.1",
     "ts-node": "^10.9.1",
-    "typechat": "^0.0.10"
+    "fira-board-typechat": "0.0.10-alpha.1"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.2",
