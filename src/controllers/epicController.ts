@@ -1,6 +1,6 @@
 import Epic from "../models/epic";
 import Task from "../models/task";
-import fetchWithReferences from "../utility/referenceMapping";
+import { fetchEpic } from "../utility/referenceMapping";
 import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
 
@@ -13,11 +13,11 @@ export const listEpics = async (req: SessionRequest, res: Response) => {
 
   let epics = await Epic.find(query).lean();
 
-  if (fetch) {
-    epics = await fetchWithReferences(epics, "epic");
-  }
+  if (fetch)
+    res.json(epics.map(async (epic) => await fetchEpic(epic)));
+  else
+    res.json(epics);
 
-  res.json(epics);
 };
 
 export const createEpic = async (req: SessionRequest, res: Response) => {
@@ -51,12 +51,10 @@ export const listEpic = async (req: SessionRequest, res: Response) => {
 
   const fetch = Number(req.query.fetch);
 
-  if (fetch) {
-    epic = await fetchWithReferences(epic, "epic");
-  }
-
-  console.log("Epic found");
-  res.json(epic);
+  if (fetch)
+    res.json(await fetchEpic(epic));
+  else
+    res.json(epic);
 };
 
 export const deleteEpic = async (req: SessionRequest, res: Response) => {
@@ -95,10 +93,8 @@ export const updateEpic = async (req: SessionRequest, res: Response) => {
     { _id: req.params.id, project: req.params.projectId, deleted: false }, updatedData
   ).lean();
 
-  if (!updated) {
+  if (!updated) 
     return res.status(404).send("Epic not found");
-  }
-
-  console.log("Epic updated successfully");
+  
   res.json(updated);
 };

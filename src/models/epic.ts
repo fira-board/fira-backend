@@ -11,7 +11,7 @@ export interface IEpic extends Document {
   status: "Not Started" | "In Progress" | "Completed";
   userId: string;
   deleted: boolean;
-  tasks: Ref<ITask>[];
+  tasks: ITask[];
   resource: Ref<IResource>;
   project: Ref<IProject>;
   order: number;

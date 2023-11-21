@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import { Document, Types } from "mongoose";
+import { Document } from "mongoose";
 import { IResource } from "./resource";
-
-type Ref<T extends Document> = T | Types.ObjectId;
+import { IEpic } from "./epic";
+import { ITask } from "./task";
 
 
 export interface IProject extends Document {
@@ -10,7 +10,9 @@ export interface IProject extends Document {
   description?: string;
   prompt?: string;
   userId: string;
-  resources: Ref<IResource>[];
+  resources: IResource[];
+  epics: IEpic[];
+  tasks: ITask[];
 }
 
 const ProjectSchema = new mongoose.Schema({
@@ -37,13 +39,7 @@ const ProjectSchema = new mongoose.Schema({
   userId: {
     type: String,
     required: true,
-  },
-  resources: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "resource",
-    },
-  ],
+  }
 });
 
 const Project = mongoose.model<IProject>("project", ProjectSchema);
