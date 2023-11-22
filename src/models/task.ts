@@ -27,7 +27,7 @@ const TaskSchema = new mongoose.Schema({
     type: String, required: true, validate: {
       validator: function (name: string) {
         // Regular expression for title validation contains letters,numbers and - , and it has a max of 40 characters
-        return /^[a-zA-Z0-9-]{1,40}$/.test(name);
+        return /^[a-zA-Z0-9-,\s.]{1,60}$/.test(name);
       },
       message: (props: any) => `${props.value} is not a valid title!`,
     }
@@ -42,7 +42,7 @@ const TaskSchema = new mongoose.Schema({
     type: String
   },
   userId: {
-    trype: String,
+    type: String,
     required: true
   },
   estimateDaysToFinish: {
