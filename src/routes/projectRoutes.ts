@@ -12,7 +12,7 @@ const router = express.Router();
 //Project CRUD operations
 router.get("/", verifySession(), projectController.listProjects);
 router.get("/:projectId", verifySession(), checkPermissions(1), projectController.getProject);
-router.post("/", verifySession(), checkUserTokens, subtractUserTokens, projectController.createProject);
+router.post("/", verifySession(), checkUserTokens, subtractUserTokens(projectController.createProject));
 router.delete("/:projectId", verifySession(), checkPermissions(3), projectController.deleteProject);
 router.put("/:projectId", verifySession(), checkPermissions(3), projectController.updateProject);
 

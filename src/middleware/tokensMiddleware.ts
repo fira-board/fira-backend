@@ -31,31 +31,34 @@ const checkUserTokens = async (req: SessionRequest, res: Response, next: NextFun
     }
 };
 
+
 // Middleware to subtract tokens from the user
-const subtractUserTokens = async (req: SessionRequest, res: Response, next: NextFunction) => {
-    const userId = req.session!.getUserId(); // Assuming you're getting the user ID from the session
+function subtractUserTokens(handler: (req: SessionRequest, res: Response, next: NextFunction) => Promise<void>) {
+    return async (req: SessionRequest, res: Response, next: NextFunction) => {
+        await handler(req, res, next);
+        const userId = req.session!.getUserId(); // Assuming you're getting the user ID from the session
 
-    try {
-        const user = await UserData.findOne({ userId: userId });
+        try {
+            const user = await UserData.findOne({ userId: userId });
 
-        if (!user) {
-            return res.status(404).send('User not found');
-        }
-        const usageHeader = res.getHeader('usage');
-        if (!usageHeader)
+            if (!user) {
+                return res.status(404).send('User not found');
+            }
+            const usageHeader = res.getHeader('completion_tokens');
+            if (!usageHeader)
+                next();
+
+            const usage = Number(usageHeader);
+            user.consumedTokens += usage;
+            user.allowedTokens -= usage;
+            await user.save();
+
             next();
-
-        const usage = JSON.parse(usageHeader as string);
-        user.consumedTokens += usage.totalTokens;
-        user.allowedTokens -= usage.totalTokens;
-        await user.save();
-
-        next();
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Server error');
-    }
-};
-
+        } catch (error) {
+            console.error(error);
+            res.status(500).send('Server error');
+        }
+    };
+}
 
 export { checkUserTokens, subtractUserTokens };

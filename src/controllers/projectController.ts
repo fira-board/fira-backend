@@ -45,14 +45,16 @@ export const createProject = async (req: SessionRequest, res: Response) => {
     const project = await new Project(req.body);
     project.userId = userId;
 
-    res.status(201).send(project.save());
+    res.json(project.save());
   } else {
 
     let projectPlan = await generateProjectPlan(req.body.summary);
-    const fetchProject = saveToDatabase(projectPlan.data, userId);
+    const fetchProject = await saveToDatabase(projectPlan.data, userId);
 
-    res.header("usage", projectPlan.usage);
-    res.status(201).send(fetchProject);
+
+    res.header("completion_tokens", projectPlan.usage.completion_tokens);
+    res.header("prompt_tokens", projectPlan.usage.prompt_tokens)
+    res.json(fetchProject);
   };
 };
 
@@ -104,7 +106,7 @@ const saveToDatabase = async (projectPlan: ProjectPlan, userId: string) => {
   }).save();
 
 
-  projectPlan.resources.forEach(async resource => {
+  for (const resource of projectPlan.resources) {
     const resourceDocument = await new Resource({
       title: resource.title,
       project: projectDocument._id,
@@ -112,7 +114,7 @@ const saveToDatabase = async (projectPlan: ProjectPlan, userId: string) => {
     }).save();
     resouces.push(resourceDocument);
 
-    resource.epics.forEach(async epic => {
+    const epicPromises = resource.epics.map(async epic => {
       const epicDocument = await new Epic({
         title: epic.title,
         resource: resourceDocument._id,
@@ -121,7 +123,7 @@ const saveToDatabase = async (projectPlan: ProjectPlan, userId: string) => {
       }).save();
       epics.push(epicDocument);
 
-      epic.tasks.forEach(async task => {
+      const taskPromises = epic.tasks.map(async task => {
         const taskDocument = await new Task({
           title: task.title,
           estimateDaysToFinish: task.estimateDaysToFinish,
@@ -132,8 +134,11 @@ const saveToDatabase = async (projectPlan: ProjectPlan, userId: string) => {
         }).save();
         tasks.push(taskDocument);
       });
+      await Promise.all(taskPromises);
+
     });
-  });
+    await Promise.all(epicPromises);
+  };
 
   projectDocument.resources = resouces;
   projectDocument.epics = epics;
