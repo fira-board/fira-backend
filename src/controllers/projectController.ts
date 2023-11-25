@@ -8,37 +8,38 @@ import { SessionRequest } from "supertokens-node/framework/express";
 import projectUserRole from "../models/projectUserRoles";
 import { fetchProject } from "../utility/referenceMapping";
 import { ProjectPlan } from "../models/ai/project/ProjectPlanSchema";
+import ProjectUserRoles from "../models/projectUserRoles";
 
 export const listProjects = async (req: SessionRequest, res: Response) => {
+  const projectIds = await projectUserRole
+    .find({ userId: req.session!.getUserId() })
+    .select("projectId")
+    .lean();
+  const projectIdsArray = projectIds.map((item) => item.projectId);
 
-  const projectIds = await projectUserRole.find({ userId: req.session!.getUserId() }).select('projectId').lean();
-
-  let projects = await Project.find({ _id: { $in: projectIds } });
-
-  const fetch = Number(req.query.fetch);
-
-  if (fetch) {
-    res.json(projects.map(async (project) => await fetchProject(project)));
+  let projects = await Project.find({ _id: { $in: projectIdsArray } });
+  
+  if (Number(req.query.fetch)) {
+    const fetchedProjects = await Promise.all(projects.map(fetchProject));
+    res.json(fetchedProjects);
   } else {
     res.json(projects);
   }
 };
 
 export const getProject = async (req: SessionRequest, res: Response) => {
+  let project = await Project.findOne({
+    _id: req.params.projectId,
+    deleted: false,
+  });
 
-  let project = await Project.findOne({ _id: req.params.projectId, deleted: false });
+  if (!project) return res.status(404).send("Project not found");
 
-  if (!project)
-    return res.status(404).send("Project not found");
-
-  if (req.query.fetch)
-    res.json(await fetchProject(project));
-  else
-    res.json(project);
+  if (req.query.fetch) res.json(await fetchProject(project));
+  else res.json(project);
 };
 
 export const createProject = async (req: SessionRequest, res: Response) => {
-
   const userId = req.session!.getUserId();
 
   if (req.query.empty) {
@@ -47,20 +48,21 @@ export const createProject = async (req: SessionRequest, res: Response) => {
 
     res.json(project.save());
   } else {
-
     let projectPlan = await generateProjectPlan(req.body.summary);
     const fetchProject = await saveToDatabase(projectPlan.data, userId);
-
+    ProjectUserRoles.create({
+      projectId: fetchProject._id,
+      userId: userId,
+      role: 3,
+    });
 
     res.header("completion_tokens", projectPlan.usage.completion_tokens);
-    res.header("prompt_tokens", projectPlan.usage.prompt_tokens)
+    res.header("prompt_tokens", projectPlan.usage.prompt_tokens);
     res.json(fetchProject);
-  };
+  }
 };
 
-
 export const deleteProject = async (req: SessionRequest, res: Response) => {
-
   const deleted = await Project.deleteOne({
     _id: req.params.projectId,
   });
@@ -91,7 +93,6 @@ export const updateProject = async (req: SessionRequest, res: Response) => {
   res.json(updated);
 };
 
-
 const saveToDatabase = async (projectPlan: ProjectPlan, userId: string) => {
   let resouces = new Array();
   let epics = new Array();
@@ -105,7 +106,6 @@ const saveToDatabase = async (projectPlan: ProjectPlan, userId: string) => {
     userId: userId,
   }).save();
 
-
   for (const resource of projectPlan.resources) {
     const resourceDocument = await new Resource({
       title: resource.title,
@@ -114,7 +114,7 @@ const saveToDatabase = async (projectPlan: ProjectPlan, userId: string) => {
     }).save();
     resouces.push(resourceDocument);
 
-    const epicPromises = resource.epics.map(async epic => {
+    const epicPromises = resource.epics.map(async (epic) => {
       const epicDocument = await new Epic({
         title: epic.title,
         resource: resourceDocument._id,
@@ -123,7 +123,7 @@ const saveToDatabase = async (projectPlan: ProjectPlan, userId: string) => {
       }).save();
       epics.push(epicDocument);
 
-      const taskPromises = epic.tasks.map(async task => {
+      const taskPromises = epic.tasks.map(async (task) => {
         const taskDocument = await new Task({
           title: task.title,
           estimateDaysToFinish: task.estimateDaysToFinish,
@@ -135,10 +135,9 @@ const saveToDatabase = async (projectPlan: ProjectPlan, userId: string) => {
         tasks.push(taskDocument);
       });
       await Promise.all(taskPromises);
-
     });
     await Promise.all(epicPromises);
-  };
+  }
 
   projectDocument.resources = resouces;
   projectDocument.epics = epics;
