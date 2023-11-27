@@ -9,7 +9,7 @@ export const listTasks = async (req: SessionRequest, res: Response) => {
   query.deleted = false;
 
   // Find tasks based on the query object
-  const tasks = await Task.find(query);
+  const tasks = await Task.find(query).populate("resource").populate("epic");
 
   res.json(tasks);
 };
@@ -18,7 +18,7 @@ export const createTask = async (req: SessionRequest, res: Response) => {
 
   const userId = req.session!.getUserId();
 
-  const newTask = await new Task({
+  const newTask = new Task({
     title: req.body.title,
     status: "Not Started",
     estimateDaysToFinish: req.body.estimateDaysToFinish,
@@ -26,11 +26,9 @@ export const createTask = async (req: SessionRequest, res: Response) => {
     resource: req.body.resourceId,
     project: req.params.projectId,
     userId: userId,
-  });
+  }).save();
 
-  await newTask.save();
-
-  res.status(201).json(newTask._id);
+  res.status(201).json(newTask);
 };
 
 export const getTask = async (req: SessionRequest, res: Response) => {
@@ -39,7 +37,7 @@ export const getTask = async (req: SessionRequest, res: Response) => {
     _id: req.params.id,
     project: req.params.projectId,
     deleted: false,
-  });
+  }).populate("resource").populate("epic");
 
   if (!task) {
     return res.status(404).send("Task not found");

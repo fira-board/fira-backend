@@ -1,23 +1,29 @@
 import Epic from "../models/epic";
 import Task from "../models/task";
-import { fetchEpic } from "../utility/referenceMapping";
 import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
+import mongoose from "mongoose";
+import { IEpic } from "../models/epic";
 
 export const listEpics = async (req: SessionRequest, res: Response) => {
-  const query: any = req.query;
-  const fetch = req.query.fetch;
+  const fetchTasks = req.query.fetch === 'true';
+  const includeDeleted = req.query.includeDeleted === 'true';
 
-  query.project = req.params.projectId;
-  query.deleted = false;
+  let query: mongoose.Query<IEpic[], IEpic> = Epic.find({}).populate('resource').where('deleted').equals(includeDeleted);
 
-  let epics = await Epic.find(query).lean();
-
-  if (fetch)
-    res.json(epics.map(async (epic) => await fetchEpic(epic)));
-  else
-    res.json(epics);
-
+  if (fetchTasks) {
+    if (includeDeleted) {
+      query = query.populate('tasks');
+    } else {
+      query = query.populate({
+        path: 'tasks',
+        match: { deleted: false }
+      });
+    }
+  }
+  
+  const epics = await query.exec();
+  res.json(epics);
 };
 
 export const createEpic = async (req: SessionRequest, res: Response) => {
@@ -37,24 +43,30 @@ export const createEpic = async (req: SessionRequest, res: Response) => {
   res.json(newEpic._id);
 };
 
-export const listEpic = async (req: SessionRequest, res: Response) => {
+export const getEpic = async (req: SessionRequest, res: Response) => {
+  const { id } = req.params;
+  const fetchTasks = req.query.fetch === 'true';
+  const includeDeleted = req.query.includeDeleted === 'true';
 
-  let epic = await Epic.findOne({
-    _id: req.params.id,
-    project: req.params.projectId,
-    deleted: false,
-  }).lean();
+  let query: mongoose.Query<IEpic | null, IEpic> = Epic.findById(id).populate('resource').where('deleted').equals(includeDeleted);
 
-  if (!epic) {
-    return res.status(404).send("Epic not found or marked as deleted");
+  if (fetchTasks) {
+    if (includeDeleted) {
+      query = query.populate('tasks');
+    } else {
+      query = query.populate({
+        path: 'tasks',
+        match: { deleted: false }
+      });
+    }
   }
 
-  const fetch = Number(req.query.fetch);
+  const epic = await query.exec();
 
-  if (fetch)
-    res.json(await fetchEpic(epic));
-  else
-    res.json(epic);
+  if (!epic) {
+    return res.status(404).send('Epic not found or has been deleted');
+  }
+  res.json(epic);
 };
 
 export const deleteEpic = async (req: SessionRequest, res: Response) => {
@@ -93,8 +105,8 @@ export const updateEpic = async (req: SessionRequest, res: Response) => {
     { _id: req.params.id, project: req.params.projectId, deleted: false }, updatedData
   ).lean();
 
-  if (!updated) 
+  if (!updated)
     return res.status(404).send("Epic not found");
-  
+
   res.json(updated);
 };

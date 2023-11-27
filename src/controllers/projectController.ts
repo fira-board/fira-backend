@@ -15,10 +15,11 @@ export const listProjects = async (req: SessionRequest, res: Response) => {
     .find({ userId: req.session!.getUserId() })
     .select("projectId")
     .lean();
+
   const projectIdsArray = projectIds.map((item) => item.projectId);
 
   let projects = await Project.find({ _id: { $in: projectIdsArray } });
-  
+
   if (Number(req.query.fetch)) {
     const fetchedProjects = await Promise.all(projects.map(fetchProject));
     res.json(fetchedProjects);
@@ -35,37 +36,42 @@ export const getProject = async (req: SessionRequest, res: Response) => {
 
   if (!project) return res.status(404).send("Project not found");
 
-  if (req.query.fetch) res.json(await fetchProject(project));
-  else res.json(project);
+  if (req.query.fetch)
+    res.json(await fetchProject(project));
+  else
+    res.json(project);
 };
 
 export const createProject = async (req: SessionRequest, res: Response) => {
   const userId = req.session!.getUserId();
 
-  if (req.query.empty) {
-    const project = await new Project(req.body);
-    project.userId = userId;
+  let projectPlan = await generateProjectPlan(req.body.summary);
+  const fetchProject = await saveToDatabase(projectPlan.data, userId);
 
-    res.json(project.save());
-  } else {
-    let projectPlan = await generateProjectPlan(req.body.summary);
-    const fetchProject = await saveToDatabase(projectPlan.data, userId);
-    ProjectUserRoles.create({
-      projectId: fetchProject._id,
-      userId: userId,
-      role: 3,
-    });
+  ProjectUserRoles.create({
+    projectId: fetchProject._id,
+    userId: userId,
+    role: 3,
+  });
 
-    res.header("completion_tokens", projectPlan.usage.completion_tokens);
-    res.header("prompt_tokens", projectPlan.usage.prompt_tokens);
-    res.json(fetchProject);
-  }
+  res.header("completion_tokens", projectPlan.usage.completion_tokens);
+  res.header("prompt_tokens", projectPlan.usage.prompt_tokens);
+  req.params.projectId = fetchProject._id;
+  req.query.fetch = "1";
+
+  res.json(getProject(req, res));
+
 };
 
 export const deleteProject = async (req: SessionRequest, res: Response) => {
-  const deleted = await Project.deleteOne({
-    _id: req.params.projectId,
-  });
+
+  const deleted = await Project.findOneAndUpdate(
+    { _id: req.params.id },
+    { deleted: true }
+  );
+
+  await Epic.updateMany({ project: req.params.id }, { deleted: true });
+  await Task.updateMany({ project: req.params.id }, { deleted: true });
 
   console.log("Project deleted successfully");
 
@@ -76,8 +82,6 @@ export const updateProject = async (req: SessionRequest, res: Response) => {
   const updatedData = {
     name: req.body.name,
     description: req.body.description,
-    prompt: req.body.description,
-    resources: req.body.resources,
   };
 
   const updated = await Project.updateOne(
@@ -138,10 +142,6 @@ const saveToDatabase = async (projectPlan: ProjectPlan, userId: string) => {
     });
     await Promise.all(epicPromises);
   }
-
-  projectDocument.resources = resouces;
-  projectDocument.epics = epics;
-  projectDocument.tasks = tasks;
 
   return projectDocument;
 };

@@ -1,8 +1,11 @@
 import mongoose from "mongoose";
-import { Document } from "mongoose";
-import { IResource } from "./resource";
+import { Document, Types } from "mongoose";
 import { IEpic } from "./epic";
-import { ITask } from "./task";
+
+
+
+// The type Ref<T> is either an ObjectId or the full type T
+type Ref<T extends Document> = T | Types.ObjectId;
 
 export interface IProject extends Document {
   name: string;
@@ -10,9 +13,7 @@ export interface IProject extends Document {
   prompt?: string;
   userId: string;
   deleted: boolean;
-  resources: IResource[];
-  epics: IEpic[];
-  tasks: ITask[];
+  epics: Ref<IEpic>[];
 }
 
 const ProjectSchema = new mongoose.Schema({
@@ -44,7 +45,12 @@ const ProjectSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
     required: true,
-  },
+  }, epics: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "resource",
+    },
+  ],
 });
 
 const Project = mongoose.model<IProject>("project", ProjectSchema);

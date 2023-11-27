@@ -4,17 +4,20 @@ import { IResource } from "./resource";
 import { IProject } from "./project";
 import { ITask } from "./task";
 
+
+// The type Ref<T> is either an ObjectId or the full type T
 type Ref<T extends Document> = T | Types.ObjectId;
+
 
 export interface IEpic extends Document {
   title: string;
   status: "Not Started" | "In Progress" | "Completed";
   userId: string;
   deleted: boolean;
-  tasks: ITask[];
   resource: Ref<IResource>;
   project: Ref<IProject>;
   order: number;
+  tasks: Ref<ITask>[];
 }
 
 const EpicSchema = new mongoose.Schema<IEpic>({
@@ -42,6 +45,7 @@ const EpicSchema = new mongoose.Schema<IEpic>({
     ref: "project",
   },
   order: Number,
+  tasks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Task' }],
 });
 
 const Epic = mongoose.model<IEpic>("epic", EpicSchema);
