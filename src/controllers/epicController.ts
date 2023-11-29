@@ -4,6 +4,7 @@ import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
 import mongoose from "mongoose";
 import { IEpic } from "../models/epic";
+import Project from "../models/project";
 
 export const listEpics = async (req: SessionRequest, res: Response) => {
   const fetchTasks = req.query.fetch === 'true';
@@ -21,34 +22,44 @@ export const listEpics = async (req: SessionRequest, res: Response) => {
       });
     }
   }
-  
+
   const epics = await query.exec();
   res.json(epics);
 };
 
 export const createEpic = async (req: SessionRequest, res: Response) => {
   const userId = req.session!.getUserId();
+  const projectId = req.params.projectId;
+  const project = await Project.findById(projectId).
+    where('deleted').equals(false);
 
+  if (!project) {
+    return res.status(404).send("Project not found");
+  }
 
-  const newEpic = new Epic({
+  const newEpic = await new Epic({
     title: req.body.title,
     status: req.body.status,
     resource: req.body.resourceId,
-    project: req.params.projectId,
+    project: projectId,
     userId: userId,
-  });
+  }).save();
 
-  await newEpic.save();
+  //push epic to project
+  project.epics.push(newEpic._id);
+  await project.save();
 
-  res.json(newEpic._id);
+  res.json(newEpic);
 };
 
 export const getEpic = async (req: SessionRequest, res: Response) => {
-  const { id } = req.params;
   const fetchTasks = req.query.fetch === 'true';
   const includeDeleted = req.query.includeDeleted === 'true';
 
-  let query: mongoose.Query<IEpic | null, IEpic> = Epic.findById(id).populate('resource').where('deleted').equals(includeDeleted);
+  let query: mongoose.Query<IEpic | null, IEpic> = Epic.findOne({
+    _id: req.params.id,
+    project: req.params.projectId
+  }).populate('resource').where('deleted').equals(includeDeleted);
 
   if (fetchTasks) {
     if (includeDeleted) {
@@ -73,7 +84,7 @@ export const deleteEpic = async (req: SessionRequest, res: Response) => {
 
   // Mark epic as deleted
   const deleted = await Epic.findOneAndUpdate(
-    { _id: req.params.id, project: req.params.projectId },
+    { _id: req.params.id, project: req.params.projectId, deleted: false },
     { deleted: true }
   ).lean();
 

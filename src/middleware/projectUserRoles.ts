@@ -8,7 +8,7 @@ function checkPermissions(requiredRole: number) {
       const userId = req.session!.getUserId(); // or however you retrieve the userId
       const projectId = req.params.projectId; // or however you retrieve the projectId
 
-      const userRole = await ProjectUserRoles.findOne({ userId, projectId });
+      const userRole = await ProjectUserRoles.findOne({ userId, projectId});
 
       if (!userRole || userRole.role < requiredRole) {
         return res.status(403).send('Insufficient permissions');

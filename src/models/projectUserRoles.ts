@@ -25,7 +25,12 @@ const projectUserRolesSchema: Schema = new Schema({
         type: Number,
         required: true,
         enum: [1, 2, 3] // 1 for read, 2 for write, 3 for owner
-    }
+    },
+    projectIsDeleted: {
+        type: Boolean,
+        default: false,
+        required: true,
+    },
 });
 
 const ProjectUserRoles = mongoose.model<IProjectUserRoles>('ProjectUserRoles', projectUserRolesSchema);

@@ -1,4 +1,4 @@
-import Project from "../models/project";
+import Project, { IProject } from "../models/project";
 import Resource from "../models/resource";
 import Epic from "../models/epic";
 import Task from "../models/task";
@@ -6,75 +6,95 @@ import { generateProjectPlan } from "../models/ai/project/ProjectPlanGenerator";
 import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
 import projectUserRole from "../models/projectUserRoles";
-import { fetchProject } from "../utility/referenceMapping";
 import { ProjectPlan } from "../models/ai/project/ProjectPlanSchema";
 import ProjectUserRoles from "../models/projectUserRoles";
+import mongoose from "mongoose";
 
 export const listProjects = async (req: SessionRequest, res: Response) => {
+  const fetchTasks = req.query.fetch === 'true';
+  const includeDeleted = req.query.includeDeleted === 'true';
   const projectIds = await projectUserRole
-    .find({ userId: req.session!.getUserId() })
+    .find({ userId: req.session!.getUserId(), projectIsDeleted: false })
     .select("projectId")
     .lean();
 
+
   const projectIdsArray = projectIds.map((item) => item.projectId);
 
-  let projects = await Project.find({ _id: { $in: projectIdsArray } });
+  let query: mongoose.Query<IProject[], IProject> = Project.find({ _id: { $in: projectIdsArray }, deleted: includeDeleted });
 
-  if (Number(req.query.fetch)) {
-    const fetchedProjects = await Promise.all(projects.map(fetchProject));
-    res.json(fetchedProjects);
-  } else {
-    res.json(projects);
+  if (fetchTasks) {
+    if (includeDeleted) {
+      query = queryDeletedPopulatedProjects(query)
+    } else {
+      query = queryPopulatedProjects(query)
+    }
   }
+
+  const projects = await query.exec();
+  res.json(projects);
 };
 
 export const getProject = async (req: SessionRequest, res: Response) => {
-  let project = await Project.findOne({
-    _id: req.params.projectId,
-    deleted: false,
-  });
+  const id = req.params.projectId;
+  const fetchTasks = req.query.fetch === 'true';
+  const includeDeleted = req.query.includeDeleted === 'false';
 
-  if (!project) return res.status(404).send("Project not found");
 
-  if (req.query.fetch)
-    res.json(await fetchProject(project));
-  else
-    res.json(project);
+  let query: mongoose.Query<IProject | null, IProject> = Project.findById(id).where('deleted').equals(includeDeleted);
+
+  if (fetchTasks) {
+    if (includeDeleted) {
+      query = queryDeletedProject(query);
+    } else {
+      query = queryProject(query);
+    }
+  }
+
+  const project = await query.exec();
+
+  if (!project) {
+    return res.status(404).send('Project not found or has been deleted');
+  }
+  res.json(project);
 };
 
 export const createProject = async (req: SessionRequest, res: Response) => {
   const userId = req.session!.getUserId();
 
   let projectPlan = await generateProjectPlan(req.body.summary);
-  const fetchProject = await saveToDatabase(projectPlan.data, userId);
+  const project = await saveToDatabase(projectPlan.data, userId);
 
   ProjectUserRoles.create({
-    projectId: fetchProject._id,
+    projectId: project._id,
     userId: userId,
     role: 3,
   });
 
   res.header("completion_tokens", projectPlan.usage.completion_tokens);
   res.header("prompt_tokens", projectPlan.usage.prompt_tokens);
-  req.params.projectId = fetchProject._id;
-  req.query.fetch = "1";
 
-  res.json(getProject(req, res));
-
+  res.json(project);
 };
 
 export const deleteProject = async (req: SessionRequest, res: Response) => {
+  const projectId = req.params.projectId;
 
   const deleted = await Project.findOneAndUpdate(
-    { _id: req.params.id },
+    { _id: projectId, deleted: false },
     { deleted: true }
-  );
+  ).lean();
 
-  await Epic.updateMany({ project: req.params.id }, { deleted: true });
-  await Task.updateMany({ project: req.params.id }, { deleted: true });
+
+  if (!deleted) {
+    return res.status(404).send("Project not found");
+  }
+
+  await Epic.updateMany({ project: projectId }, { deleted: true });
+  await Task.updateMany({ project: projectId }, { deleted: true });
+  await ProjectUserRoles.updateMany({ projectId: projectId }, { projectIsDeleted: true });
 
   console.log("Project deleted successfully");
-
   res.json(deleted);
 };
 
@@ -87,7 +107,7 @@ export const updateProject = async (req: SessionRequest, res: Response) => {
   const updated = await Project.updateOne(
     { _id: req.params.projectId, deleted: false },
     updatedData
-  );
+  ).lean();
 
   if (!updated) {
     return res.status(404).send("Project not found");
@@ -137,11 +157,91 @@ const saveToDatabase = async (projectPlan: ProjectPlan, userId: string) => {
           userId: userId,
         }).save();
         tasks.push(taskDocument);
+        epicDocument.tasks.push(taskDocument._id);
       });
       await Promise.all(taskPromises);
+      epicDocument.save();
     });
     await Promise.all(epicPromises);
+    projectDocument.epics.push(...epics.map((epic) => epic._id));
   }
 
-  return projectDocument;
+  return projectDocument.save();
 };
+
+function queryProject(query: mongoose.Query<IProject | null, IProject, {}, IProject, "find">) {
+  return query.populate(
+    {
+      path: 'epics', model: "epic", populate: [
+        {
+          path: "resource",
+          model: "resource",
+          match: { deleted: false }
+
+        },
+        {
+          path: "tasks",
+          model: "task",
+          match: { deleted: false }
+
+        }
+      ],
+    }
+  );
+}
+
+function queryDeletedProject(query: mongoose.Query<IProject | null, IProject, {}, IProject, "find">): mongoose.Query<IProject | null, IProject, {}, IProject, "find"> {
+  //has no deleted flag so populate all
+  return query.populate(
+    {
+      path: 'epics', model: "epic", populate: [
+        {
+          path: "resource",
+          model: "resource",
+        },
+        {
+          path: "tasks",
+          model: "task",
+        }
+      ],
+    }
+  );
+}
+
+function queryPopulatedProjects(query: mongoose.Query<IProject[], IProject, {}, IProject, "find">): mongoose.Query<IProject[], IProject, {}, IProject, "find"> {
+  return query.populate(
+    {
+      path: 'epics', model: "epic", populate: [
+        {
+          path: "resource",
+          model: "resource",
+        },
+        {
+          path: "tasks",
+          model: "task",
+          match: { deleted: false }
+        }
+      ],
+      match: { deleted: false }
+    }
+  );
+}
+
+function queryDeletedPopulatedProjects(query: mongoose.Query<IProject[], IProject, {}, IProject, "find">): mongoose.Query<IProject[], IProject, {}, IProject, "find"> {
+  //has no deleted flag so populate all
+  return query.populate(
+    {
+      path: 'epics', model: "epic", populate: [
+        {
+          path: "resource",
+          model: "resource",
+        },
+        {
+          path: "tasks",
+          model: "task",
+        }
+      ]
+    }
+  );
+}
+
