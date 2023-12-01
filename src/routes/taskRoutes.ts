@@ -5,10 +5,10 @@ import  checkPermissions  from "../middleware/projectUserRoles";
 
 const router = express.Router();
 
-router.get("/", checkPermissions(1),verifySession(), taskController.listTasks);
-router.get("/:id", checkPermissions(1),verifySession(), taskController.getTask);
-router.post("/", checkPermissions(2),verifySession(), taskController.createTask);
-router.delete("/:id", checkPermissions(2),verifySession(), taskController.deleteTask);
-router.put("/:id", checkPermissions(2),verifySession(), taskController.updateTask);
+router.get("/projects/:projectId/tasks/", checkPermissions(1),verifySession(), taskController.listTasks);
+router.get("/projects/:projectId/tasks/:id", checkPermissions(1),verifySession(), taskController.getTask);
+router.post("/projects/:projectId/tasks/", checkPermissions(2),verifySession(), taskController.createTask);
+router.delete("/projects/:projectId/tasks/:id", checkPermissions(2),verifySession(), taskController.deleteTask);
+router.put("/projects/:projectId/tasks/:id", checkPermissions(2),verifySession(), taskController.updateTask);
 
 export default router;

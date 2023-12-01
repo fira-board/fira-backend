@@ -5,10 +5,10 @@ import  checkPermissions  from "../middleware/projectUserRoles";
 
 const router = express.Router();
 
-router.get("/", verifySession(), checkPermissions(1),epicController.listEpics);
-router.get("/:id", verifySession(),checkPermissions(1), epicController.getEpic);
-router.post("/", verifySession(),checkPermissions(2), epicController.createEpic);
-router.delete("/:id", verifySession(),checkPermissions(2), epicController.deleteEpic);
-router.put("/:id", verifySession(),checkPermissions(2), epicController.updateEpic);
+router.get("/projects/:projectId/epics/", verifySession(), checkPermissions(1),epicController.listEpics);
+router.get("/projects/:projectId/epics/:id", verifySession(),checkPermissions(1), epicController.getEpic);
+router.post("/projects/:projectId/epics/", verifySession(),checkPermissions(2), epicController.createEpic);
+router.delete("/projects/:projectId/epics/:id", verifySession(),checkPermissions(2), epicController.deleteEpic);
+router.put("/projects/:projectId/epics/:id", verifySession(),checkPermissions(2), epicController.updateEpic);
 
 export default router;

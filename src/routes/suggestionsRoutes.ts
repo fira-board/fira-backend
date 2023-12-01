@@ -5,8 +5,8 @@ import { checkUserTokens, subtractUserTokens } from '../middleware/tokensMiddlew
 
 const router = express.Router();
 
-router.get("/epic", verifySession(), checkUserTokens, subtractUserTokens(suggestionsController.suggestNewEpic));
-router.get("/task", verifySession(), checkUserTokens, subtractUserTokens(suggestionsController.suggestNewTask));
-router.get("/project", verifySession(), checkUserTokens, subtractUserTokens(suggestionsController.suggestAReviewforProject));
+router.get("/projects/:projectId/suggestions/epic", verifySession(), checkUserTokens, subtractUserTokens(suggestionsController.suggestNewEpic));
+router.get("/projects/:projectId/suggestions/task", verifySession(), checkUserTokens, subtractUserTokens(suggestionsController.suggestNewTask));
+router.get("/projects/:projectId/suggestions/project", verifySession(), checkUserTokens, subtractUserTokens(suggestionsController.suggestAReviewforProject));
 
 export default router;

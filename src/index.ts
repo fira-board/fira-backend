@@ -47,15 +47,15 @@ if (!MONGO_URI) {
 }
 
 mongoose.connect(MONGO_URI);
-
+-
 
 //routes
 app.use(express.json());
 app.use("/projects", projectRoutes);
 app.use("/resources", resourceRoutes);
-app.use("/projects/:projectId/epics", epicRoutes);
-app.use("/projects/:projectId/tasks", taskRoutes);
-app.use("/projects/:projectId/suggestions", suggestionRoutes);
+app.use(epicRoutes);
+app.use(taskRoutes);
+app.use(suggestionRoutes);
 app.use("/feedback", feedbackRoutes);
 
 
