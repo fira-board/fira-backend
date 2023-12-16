@@ -71,6 +71,9 @@ const TaskSchema = new mongoose.Schema({
     required: true,
   },
   order: Number,
+  ////TODO add start and end date
+  //// will remove the order
+  
 });
 
 const Task = mongoose.model<ITask>("task", TaskSchema);

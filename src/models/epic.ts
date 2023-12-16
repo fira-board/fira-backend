@@ -46,6 +46,8 @@ const EpicSchema = new mongoose.Schema<IEpic>({
   },
   order: Number,
   tasks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'task' }],
+    //add start and end date
+
 });
 
 const Epic = mongoose.model<IEpic>("epic", EpicSchema);

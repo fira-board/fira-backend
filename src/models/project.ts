@@ -51,6 +51,13 @@ const ProjectSchema = new mongoose.Schema({
       ref: "resource",
     },
   ],
+
+  //TODO list of status for the project
+  // it's an object contains the status name and the status color and order
+  // userid and the defualt is system
+
+  //TODO add start and end date
+
 });
 
 const Project = mongoose.model<IProject>("project", ProjectSchema);

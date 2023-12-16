@@ -32,6 +32,8 @@ export const generateProjectPlan = async (summary: String) => {
   return response;
 };
 
+  ////TODO add start and end date
+  //// will remove order
 
 // // // Testing code :
 // function delay(ms: number) {
