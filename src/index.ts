@@ -11,7 +11,7 @@ import cors from "cors";
 
 import supertokens from "supertokens-node";
 import { middleware } from "supertokens-node/framework/express";
-import { getWebsiteDomain, SuperTokensConfig } from "./config";
+import { SuperTokensConfig } from "./config";
 
 
 import dotenv from "dotenv";
@@ -27,7 +27,7 @@ const PORT = process.env.PORT || 3001;
 
 app.use(
   cors({
-    origin: getWebsiteDomain(),
+    origin: "*",
     allowedHeaders: ["content-type", ...supertokens.getAllCORSHeaders()],
     methods: ["GET", "PUT", "POST", "DELETE"],
     credentials: true,
@@ -49,8 +49,8 @@ if (!MONGO_URI) {
 mongoose.connect(MONGO_URI);
 -
 
-//routes
-app.use(express.json());
+  //routes
+  app.use(express.json());
 app.use("/projects", projectRoutes);
 app.use("/resources", resourceRoutes);
 app.use(epicRoutes);

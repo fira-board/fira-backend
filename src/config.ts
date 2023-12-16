@@ -1,4 +1,4 @@
-import EmailPassword from "supertokens-node/recipe/emailpassword";
+import ThirdPartyEmailPassword from "supertokens-node/recipe/thirdpartyemailpassword";
 import Session from "supertokens-node/recipe/session";
 import { TypeInput } from "supertokens-node/types";
 import Dashboard from "supertokens-node/recipe/dashboard";
@@ -17,6 +17,7 @@ export function getWebsiteDomain() {
 }
 
 export const SuperTokensConfig: TypeInput = {
+    // debug: true,
     supertokens: {
         // this is the location of the SuperTokens core.
         connectionURI: process.env.SUPER_TOKENS_CORE_URL || "https://try.supertokens.io",
@@ -28,20 +29,20 @@ export const SuperTokensConfig: TypeInput = {
     },
     // recipeList contains all the modules that you want to
     // use from SuperTokens. See the full list here: https://supertokens.com/docs/guides
-    recipeList: [EmailPassword.init({
+    recipeList: [ThirdPartyEmailPassword.init({
         override: {
             functions: (originalImplementation) => {
                 return {
                     ...originalImplementation,
 
-                    signUp: async (input: {
+                    createNewEmailPasswordRecipeUser: async (input: {
                         email: string;
                         password: string;
                         tenantId: string;
                         userContext: any;
                     }) => {
                         // Creating the user using the original implementation
-                        const response = await originalImplementation.signUp(input);
+                        const response = await originalImplementation.createNewEmailPasswordRecipeUser(input);
 
                         if (response.status === "OK") {
                             new UserData({ userId: response.user.id, allowedTokens: 4000, consumedTokens: 0 }).save();
@@ -54,6 +55,36 @@ export const SuperTokensConfig: TypeInput = {
                     }
                 };
             }
-        }
+        },
+        providers: [{
+            config: {
+                thirdPartyId: "google",
+                clients: [{
+                    clientId: "1060725074195-kmeum4crr01uirfl2op9kd5acmi9jutn.apps.googleusercontent.com",
+                    clientSecret: "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"
+                }]
+            }
+        }, {
+            config: {
+                thirdPartyId: "github",
+                clients: [{
+                    clientId: "467101b197249757c71f",
+                    clientSecret: "e97051221f4b6426e8fe8d51486396703012f5bd"
+                }]
+            }
+        }, {
+            config: {
+                thirdPartyId: "apple",
+                clients: [{
+                    clientId: "4398792-io.supertokens.example.service",
+                    additionalConfig: {
+                        keyId: "7M48Y4RYDL",
+                        privateKey:
+                            "-----BEGIN PRIVATE KEY-----\nMIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgu8gXs+XYkqXD6Ala9Sf/iJXzhbwcoG5dMh1OonpdJUmgCgYIKoZIzj0DAQehRANCAASfrvlFbFCYqn3I2zeknYXLwtH30JuOKestDbSfZYxZNMqhF/OzdZFTV0zc5u5s3eN+oCWbnvl0hM+9IW0UlkdA\n-----END PRIVATE KEY-----",
+                        teamId: "YWQCXGJRJL",
+                    }
+                }]
+            }
+        }],
     }), Session.init(), Dashboard.init()],
 };

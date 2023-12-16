@@ -38,26 +38,21 @@ function subtractUserTokens(handler: (req: SessionRequest, res: Response, next: 
         await handler(req, res, next);
         const userId = req.session!.getUserId(); // Assuming you're getting the user ID from the session
 
-        try {
-            const user = await UserData.findOne({ userId: userId });
+        const user = await UserData.findOne({ userId: userId });
 
-            if (!user) {
-                return res.status(404).send('User not found');
-            }
-            const usageHeader = res.getHeader('completion_tokens');
-            if (!usageHeader)
-                next();
-
-            const usage = Number(usageHeader);
-            user.consumedTokens += usage;
-            user.allowedTokens -= usage;
-            await user.save();
-
-            next();
-        } catch (error) {
-            console.error(error);
-            res.status(500).send('Server error');
+        if (!user) {
+            return res.status(404).send('User not found');
         }
+        const usageHeader = res.getHeader('completion_tokens');
+        if (!usageHeader)
+            next();
+
+        const usage = Number(usageHeader);
+        user.consumedTokens += usage;
+        user.allowedTokens -= usage;
+        await user.save();
+
+        next();
     };
 }
 

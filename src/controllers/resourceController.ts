@@ -43,7 +43,6 @@ export const createResource = async (req: SessionRequest, res: Response) => {
 
   const newResource = new Resource({
     title: req.body.title,
-    project: req.body.projectId,
     userId: userId,
   });
 
