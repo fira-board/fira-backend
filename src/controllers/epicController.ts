@@ -109,8 +109,6 @@ export const updateEpic = async (req: SessionRequest, res: Response) => {
     title: req.body.title,
     status: req.body.status,
     resource: req.body.resourceId,
-    tasks: req.body.tasks,
-    order: req.body.order,
   };
   const updated = await Epic.findOneAndUpdate(
     { _id: req.params.id, project: req.params.projectId, deleted: false }, updatedData

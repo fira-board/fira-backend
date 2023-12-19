@@ -10,8 +10,8 @@ const ResourceSchema = new mongoose.Schema({
   title: {
     type: String, required: true, validate: {
       validator: function (name: string) {
-        // Regular expression for title validation contains letters,numbers and - , and it has a max of 20 characters
-        return /^[a-zA-Z0-9-,\s.]{1,60}$/.test(name);
+        // Regular expression for title validation contains letters,numbers and - , and it has a max of 60 characters
+        return /^[a-zA-Z0-9-,\s./]{1,60}$/.test(name);
       },
       message: (props: any) => `${props.value} is not a valid title!`,
     }

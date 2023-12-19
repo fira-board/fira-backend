@@ -11,14 +11,15 @@ type Ref<T extends Document> = T | Types.ObjectId;
 export interface ITask extends Document {
   title: string;
   userId: string;
-  status: "Not Started" | "In Progress" | "Completed";
+  status: "To Do" | "In Progress" | "Done";
   assignedTo?: string;
   estimateDaysToFinish?: number;
+  startDate: Date;
+  endDate: Date;
   deleted: boolean;
   epic: Ref<IEpic>;
   resource: Ref<IResource>;
   project: Ref<IProject>;
-  order: number;
 }
 
 
@@ -26,8 +27,8 @@ const TaskSchema = new mongoose.Schema({
   title: {
     type: String, required: true, validate: {
       validator: function (name: string) {
-        // Regular expression for title validation contains letters,numbers and - , and it has a max of 40 characters
-        return /^[a-zA-Z0-9-,\s.]{1,60}$/.test(name);
+        // Regular expression for title validation contains letters,numbers and - , and it has a max of 60 characters
+        return /^[a-zA-Z0-9-,\s./]{1,60}$/.test(name);
       },
       message: (props: any) => `${props.value} is not a valid title!`,
     }
@@ -35,8 +36,8 @@ const TaskSchema = new mongoose.Schema({
   status: {
     type: String,
     required: true,
-    default: "Not Started",
-    enum: ["To DO", "In Progress", "Done"]
+    default: "To Do",
+    enum: ["To Do", "In Progress", "Done"]
   },
   assignedTo: {
     type: String
@@ -49,6 +50,16 @@ const TaskSchema = new mongoose.Schema({
     type: Number,
     default: 0,
     required: true
+  },
+  startDate: {
+    type: Date,
+    default: null,
+    required: false
+  },
+  endDate: {
+    type: Date,
+    default: null,
+    required: false
   },
   deleted: {
     type: Boolean,
@@ -70,10 +81,6 @@ const TaskSchema = new mongoose.Schema({
     ref: "project",
     required: true,
   },
-  order: Number,
-  ////TODO add start and end date
-  //// will remove the order
-  
 });
 
 const Task = mongoose.model<ITask>("task", TaskSchema);

@@ -11,22 +11,31 @@ type Ref<T extends Document> = T | Types.ObjectId;
 
 export interface IEpic extends Document {
   title: string;
-  status: "Not Started" | "In Progress" | "Completed";
+  status: "To Do" | "In Progress" | "Done";
   userId: string;
   deleted: boolean;
   resource: Ref<IResource>;
   project: Ref<IProject>;
-  order: number;
+  startDate: Date;
+  endDate: Date;
   tasks: Ref<ITask>[];
 }
 
 const EpicSchema = new mongoose.Schema<IEpic>({
-  title: String,
+  title: {
+    type: String, required: true, validate: {
+      validator: function (name: string) {
+        // Regular expression for title validation contains letters,numbers and - , and it has a max of 60 characters
+        return /^[a-zA-Z0-9-,\s./]{1,60}$/.test(name);
+      },
+      message: (props: any) => `${props.value} is not a valid title!`,
+    }
+  },
 
   status: {
     type: String,
-    enum: ["Not Started", "In Progress", "Completed"],
-    default: "Not Started",
+    enum: ["To Do", "In Progress", "Done"],
+    default: "To Do",
     required: true,
   },
 
@@ -44,10 +53,17 @@ const EpicSchema = new mongoose.Schema<IEpic>({
     type: mongoose.Schema.Types.ObjectId,
     ref: "project",
   },
-  order: Number,
   tasks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'task' }],
-    //add start and end date
-
+  startDate: {
+    type: Date,
+    default: null,
+    required: false
+  },
+  endDate: {
+    type: Date,
+    default: null,
+    required: false
+  },
 });
 
 const Epic = mongoose.model<IEpic>("epic", EpicSchema);
