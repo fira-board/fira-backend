@@ -61,9 +61,11 @@ export const getProject = async (req: SessionRequest, res: Response) => {
 
 export const createProject = async (req: SessionRequest, res: Response) => {
   const userId = req.session!.getUserId();
+  const startDate = req.body.startDate ? new Date(req.body.startDate) : new Date();
+  startDate.setHours(0, 0, 0, 0); // Set the time to 00:00:00.000
 
   let projectPlan = await generateProjectPlan(req.body.summary);
-  const project = await saveToDatabase(projectPlan.data, userId);
+  const project = await saveToDatabase(projectPlan.data, userId , startDate);
 
   ProjectUserRoles.create({
     projectId: project._id,
@@ -117,7 +119,7 @@ export const updateProject = async (req: SessionRequest, res: Response) => {
   res.json(updated);
 };
 
-const saveToDatabase = async (projectPlan: ProjectPlan, userId: string) => {
+const saveToDatabase = async (projectPlan: ProjectPlan, userId: string, projectStartDate: Date) => {
   let resouces = new Array();
   let epics = new Array();
   let tasks = new Array();
@@ -126,8 +128,8 @@ const saveToDatabase = async (projectPlan: ProjectPlan, userId: string) => {
     name: projectPlan.name,
     description: projectPlan.description,
     prompt: projectPlan.description,
-    resources: projectPlan.resources,
     userId: userId,
+    startDate: projectStartDate
   }).save();
 
   for (const resource of projectPlan.resources) {
@@ -138,6 +140,8 @@ const saveToDatabase = async (projectPlan: ProjectPlan, userId: string) => {
     }).save();
     resouces.push(resourceDocument);
 
+    let taskTimeline = new Date(projectStartDate);
+    
     const epicPromises = resource.epics.map(async (epic) => {
       const epicDocument = await new Epic({
         title: epic.title,
@@ -152,13 +156,17 @@ const saveToDatabase = async (projectPlan: ProjectPlan, userId: string) => {
           title: task.title,
           estimateDaysToFinish: task.estimateDaysToFinish,
           epic: epicDocument._id,
+          startDate: new Date(taskTimeline),
+          endDate: new Date(taskTimeline.setDate(taskTimeline.getDate() + task.estimateDaysToFinish)),
           resource: resourceDocument._id,
           project: projectDocument._id,
           userId: userId,
         }).save();
+
         tasks.push(taskDocument);
         epicDocument.tasks.push(taskDocument._id);
       });
+
       await Promise.all(taskPromises);
       epicDocument.save();
     });
@@ -175,8 +183,7 @@ function queryProject(query: mongoose.Query<IProject | null, IProject, {}, IProj
       path: 'epics', model: "epic", populate: [
         {
           path: "resource",
-          model: "resource",
-          match: { deleted: false }
+          model: "resource"
 
         },
         {

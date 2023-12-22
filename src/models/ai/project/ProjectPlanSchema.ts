@@ -32,8 +32,6 @@ export interface Epic {
   // The projected number of days required to complete all tasks within this epic.
   estimateDaysToFinish: number;
 
-  // The chronological order of the epic within its resource represented by a number.
-  order: number;
 }
 
 // Represents the most granular unit of work within a project. A task is a specific action or series of actions that can be delegated to a resource for execution.
@@ -44,6 +42,4 @@ export interface Task {
   // The projected number of days required to complete this task.
   estimateDaysToFinish: number;
 
-  // The chronological order of the task within its epic represented by a number.
-  order: number;
 }

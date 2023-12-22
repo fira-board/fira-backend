@@ -16,8 +16,6 @@ export interface IEpic extends Document {
   deleted: boolean;
   resource: Ref<IResource>;
   project: Ref<IProject>;
-  startDate: Date;
-  endDate: Date;
   tasks: Ref<ITask>[];
 }
 
@@ -54,16 +52,6 @@ const EpicSchema = new mongoose.Schema<IEpic>({
     ref: "project",
   },
   tasks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'task' }],
-  startDate: {
-    type: Date,
-    default: null,
-    required: false
-  },
-  endDate: {
-    type: Date,
-    default: null,
-    required: false
-  },
 });
 
 const Epic = mongoose.model<IEpic>("epic", EpicSchema);

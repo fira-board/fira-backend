@@ -1,6 +1,4 @@
 import Task from "../models/task";
-import { ITask } from "../models/task";
-import mongoose from "mongoose";
 import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
 import Epic from "../models/epic";
@@ -84,37 +82,7 @@ export const updateTask = async (req: SessionRequest, res: Response) => {
     { new: true }
   );
 
-  // Update Epic Dates
-  await updateMyEpicDate(req, updatedTask);
-
   console.debug("Task updated successfully");
   res.json(updatedTask);
 };
-
-async function updateMyEpicDate(req: SessionRequest, updatedTask: (mongoose.Document<unknown, {}, ITask> & ITask & { _id: mongoose.Types.ObjectId; }) | null) {
-  if (req.body.startDate || req.body.endDate) {
-    const epic = await Epic.findOne({
-      _id: updatedTask?.epic, project: req.params.projectId, deleted: false
-    });
-
-    // IF epic doesn't have any dates, set this tasks dates
-    if (!(epic?.startDate && epic?.endDate)) {
-      epic!.startDate = req.body.startDate;
-      epic!.endDate = req.body.endDate;
-      epic?.save();
-
-      // Check which date to change
-    } else {
-      if (req.body.startDate < epic.startDate) {
-        epic.startDate = req.body.startDate;
-      }
-
-      if (req.body.endDate < epic.endDate) {
-        epic.endDate = req.body.endDate;
-      }
-
-      epic.save();
-    }
-  }
-}
 

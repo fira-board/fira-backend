@@ -12,6 +12,7 @@ export interface IProject extends Document {
   description?: string;
   prompt?: string;
   userId: string;
+  startDate: Date;
   deleted: boolean;
   epics: Ref<IEpic>[];
 }
@@ -22,7 +23,7 @@ const ProjectSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator: function (name: string) {
-        // Regular expression for name validation contains letters,numbers and - , and it has a max of 20 characters
+        // Regular expression for name validation contains letters,numbers and - , and it has a max of 40 characters
         return /^[a-zA-Z0-9-\s]{1,40}$/.test(name);
       },
       message: (props: any) => `${props.value} is not a valid name!`,
@@ -51,6 +52,11 @@ const ProjectSchema = new mongoose.Schema({
       ref: "epic",
     },
   ],
+  startDate: {
+    type: Date,
+    default: null,
+    required: false
+  },
 
   //TODO list of status for the project
   // it's an object contains the status name and the status color and order
