@@ -3,15 +3,14 @@ import { Document, Types } from "mongoose";
 import { IResource } from "./resource";
 import { IProject } from "./project";
 import { ITask } from "./task";
-
+import { IStatus } from "./status";
 
 // The type Ref<T> is either an ObjectId or the full type T
 type Ref<T extends Document> = T | Types.ObjectId;
 
-
 export interface IEpic extends Document {
   title: string;
-  status: "To Do" | "In Progress" | "Done";
+  status: Ref<IStatus>;
   userId: string;
   deleted: boolean;
   resource: Ref<IResource>;
@@ -29,14 +28,11 @@ const EpicSchema = new mongoose.Schema<IEpic>({
       message: (props: any) => `${props.value} is not a valid title!`,
     }
   },
-
   status: {
-    type: String,
-    enum: ["To Do", "In Progress", "Done"],
-    default: "To Do",
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "status",
     required: true,
   },
-
   userId: String,
   deleted: {
     type: Boolean,

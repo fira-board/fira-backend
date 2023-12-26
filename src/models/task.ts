@@ -3,15 +3,15 @@ import { Document, Types } from 'mongoose';
 import { IEpic } from "./epic";
 import { IProject } from "./project";
 import { IResource } from "./resource";
+import { IStatus } from "./status";
 
 // The type Ref<T> is either an ObjectId or the full type T
 type Ref<T extends Document> = T | Types.ObjectId;
 
-
 export interface ITask extends Document {
   title: string;
   userId: string;
-  status: "To Do" | "In Progress" | "Done";
+  status: Ref<IStatus>;
   assignedTo?: string;
   estimateDaysToFinish?: number;
   startDate: Date;
@@ -21,7 +21,6 @@ export interface ITask extends Document {
   resource: Ref<IResource>;
   project: Ref<IProject>;
 }
-
 
 const TaskSchema = new mongoose.Schema({
   title: {
@@ -34,10 +33,9 @@ const TaskSchema = new mongoose.Schema({
     }
   },
   status: {
-    type: String,
-    required: true,
-    default: "To Do",
-    enum: ["To Do", "In Progress", "Done"]
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "status",
+    required: true
   },
   assignedTo: {
     type: String

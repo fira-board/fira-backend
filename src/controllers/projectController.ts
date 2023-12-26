@@ -148,6 +148,12 @@ const saveToDatabase = async (projectPlan: ProjectPlan, userId: string, projectS
         resource: resourceDocument._id,
         project: projectDocument._id,
         userId: userId,
+        status: {
+            title: "To Do",
+            userId: userId,
+            color: "#FF0000",
+            order: 1
+        }
       }).save();
       epics.push(epicDocument);
 
@@ -161,6 +167,12 @@ const saveToDatabase = async (projectPlan: ProjectPlan, userId: string, projectS
           resource: resourceDocument._id,
           project: projectDocument._id,
           userId: userId,
+          status: {
+              title: "To Do",
+              userId: userId,
+              color: "#FF0000",
+              order: 1
+          }
         }).save();
 
         tasks.push(taskDocument);

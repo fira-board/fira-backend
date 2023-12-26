@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { Document, Types } from "mongoose";
 import { IEpic } from "./epic";
+import { IStatus } from "./status";
 
 
 
@@ -14,6 +15,7 @@ export interface IProject extends Document {
   userId: string;
   startDate: Date;
   deleted: boolean;
+  listOfStatus: Ref<IStatus>[];
   epics: Ref<IEpic>[];
 }
 
@@ -50,6 +52,12 @@ const ProjectSchema = new mongoose.Schema({
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "epic",
+    },
+  ],
+  listOfStatus: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "status",
     },
   ],
   startDate: {

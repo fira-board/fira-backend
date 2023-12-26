@@ -1,5 +1,6 @@
 import Epic from "../models/epic";
 import Task from "../models/task";
+import Status from "../models/status";
 import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
 import mongoose from "mongoose";
@@ -39,7 +40,12 @@ export const createEpic = async (req: SessionRequest, res: Response) => {
 
   const newEpic = await new Epic({
     title: req.body.title,
-    status: req.body.status,
+    status: {
+      title: req.body.statusTitle ?? "To Do",
+      userId: userId,
+      color: req.body.statusColor ?? "#FF0000",
+      order: req.body.statusOrder ?? 1,
+    },
     resource: req.body.resourceId,
     project: projectId,
     userId: userId,
@@ -105,13 +111,44 @@ export const deleteEpic = async (req: SessionRequest, res: Response) => {
 };
 
 export const updateEpic = async (req: SessionRequest, res: Response) => {
+
+  const epicId = req.params.id;
+  const projectId = req.params.projectId;
+  let statusId = req.body.status;
+
+  // Check if there's new status data to create or update the status
+  if (req.body.statusId) {
+    const existingStatus = await Status.findOne({ _id: req.body.statusTitle });
+
+    if (!existingStatus)
+      return res.status(404).send("Status not found");
+
+    // Create or update the status
+    const statusUpdate = {
+      title: req.body.statusTitle ?? existingStatus.title,
+      color: req.body.statusColor ?? existingStatus.color,
+      order: req.body.statusOrder ?? existingStatus.order,
+    };
+
+    const status = existingStatus
+      ? await Status.findByIdAndUpdate(existingStatus._id, statusUpdate, { new: true })
+      : await new Status({ ...statusUpdate, userId: req.session!.getUserId() }).save();
+
+    statusId = status?._id;
+  }
+
+  // Prepare update data for Epic
   const updatedData = {
     title: req.body.title,
-    status: req.body.status,
+    status: statusId,
     resource: req.body.resourceId,
   };
+
+  // Update the Epic
   const updated = await Epic.findOneAndUpdate(
-    { _id: req.params.id, project: req.params.projectId, deleted: false }, updatedData
+    { _id: epicId, project: projectId, deleted: false }, 
+    updatedData, 
+    { new: true }
   ).lean();
 
   if (!updated)

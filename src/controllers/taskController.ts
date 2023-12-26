@@ -20,7 +20,12 @@ export const createTask = async (req: SessionRequest, res: Response) => {
 
   const newTask = new Task({
     title: req.body.title,
-    status: req.body.status,
+    status: {
+      title: req.body.statusTitle ?? "To Do",
+      userId: userId,
+      color: req.body.statusColor ?? "#FF0000",
+      order: req.body.statusOrder ?? 1,
+    },
     estimateDaysToFinish: req.body.estimateDaysToFinish,
     epic: req.body.epicId,
     resource: req.body.resourceId,
