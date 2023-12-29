@@ -12,6 +12,7 @@ import cors from "cors";
 import supertokens from "supertokens-node";
 import { middleware } from "supertokens-node/framework/express";
 import { SuperTokensConfig } from "./config";
+import initializeData from "./initDB";
 
 
 import dotenv from "dotenv";
@@ -47,10 +48,10 @@ if (!MONGO_URI) {
 }
 
 mongoose.connect(MONGO_URI);
--
+initializeData();
 
-  //routes
-  app.use(express.json());
+//routes
+app.use(express.json());
 app.use("/projects", projectRoutes);
 app.use("/resources", resourceRoutes);
 app.use(epicRoutes);

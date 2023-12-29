@@ -9,6 +9,7 @@ import projectUserRole from "../models/projectUserRoles";
 import { ProjectPlan } from "../models/ai/project/ProjectPlanSchema";
 import ProjectUserRoles from "../models/projectUserRoles";
 import mongoose from "mongoose";
+import { SYSTEM_TO_DO, SYSTEM_IN_PROGRESS, SYSTEM_DONE } from "../models/status";
 
 export const listProjects = async (req: SessionRequest, res: Response) => {
   const fetchTasks = req.query.fetch === 'true';
@@ -41,7 +42,7 @@ export const getProject = async (req: SessionRequest, res: Response) => {
   const includeDeleted = req.query.includeDeleted === 'false';
 
 
-  let query: mongoose.Query<IProject | null, IProject> = Project.findById(id).where('deleted').equals(includeDeleted);
+  let query: mongoose.Query<IProject | null, IProject> = Project.findById(id).where('deleted').equals(includeDeleted).populate('listOfStatus');
 
   if (fetchTasks) {
     if (includeDeleted) {
@@ -65,7 +66,7 @@ export const createProject = async (req: SessionRequest, res: Response) => {
   startDate.setHours(0, 0, 0, 0); // Set the time to 00:00:00.000
 
   let projectPlan = await generateProjectPlan(req.body.summary);
-  const project = await saveToDatabase(projectPlan.data, userId , startDate);
+  const project = await saveToDatabase(projectPlan.data, userId, startDate);
 
   ProjectUserRoles.create({
     projectId: project._id,
@@ -128,6 +129,7 @@ const saveToDatabase = async (projectPlan: ProjectPlan, userId: string, projectS
     name: projectPlan.name,
     description: projectPlan.description,
     prompt: projectPlan.description,
+    listOfStatus: [SYSTEM_TO_DO, SYSTEM_IN_PROGRESS, SYSTEM_DONE],
     userId: userId,
     startDate: projectStartDate
   }).save();
@@ -141,19 +143,14 @@ const saveToDatabase = async (projectPlan: ProjectPlan, userId: string, projectS
     resouces.push(resourceDocument);
 
     let taskTimeline = new Date(projectStartDate);
-    
+
     const epicPromises = resource.epics.map(async (epic) => {
       const epicDocument = await new Epic({
         title: epic.title,
         resource: resourceDocument._id,
         project: projectDocument._id,
         userId: userId,
-        status: {
-            title: "To Do",
-            userId: userId,
-            color: "#FF0000",
-            order: 1
-        }
+        status: SYSTEM_TO_DO
       }).save();
       epics.push(epicDocument);
 
@@ -167,12 +164,7 @@ const saveToDatabase = async (projectPlan: ProjectPlan, userId: string, projectS
           resource: resourceDocument._id,
           project: projectDocument._id,
           userId: userId,
-          status: {
-              title: "To Do",
-              userId: userId,
-              color: "#FF0000",
-              order: 1
-          }
+          status: SYSTEM_TO_DO
         }).save();
 
         tasks.push(taskDocument);
@@ -202,7 +194,6 @@ function queryProject(query: mongoose.Query<IProject | null, IProject, {}, IProj
           path: "tasks",
           model: "task",
           match: { deleted: false }
-
         }
       ],
     }
@@ -221,6 +212,10 @@ function queryDeletedProject(query: mongoose.Query<IProject | null, IProject, {}
         {
           path: "tasks",
           model: "task",
+        },
+        {
+          path: "status",
+          model: "status",
         }
       ],
     }
@@ -239,6 +234,10 @@ function queryPopulatedProjects(query: mongoose.Query<IProject[], IProject, {}, 
           path: "tasks",
           model: "task",
           match: { deleted: false }
+        },
+        {
+          path: "status",
+          model: "status",
         }
       ],
       match: { deleted: false }
@@ -263,4 +262,3 @@ function queryDeletedPopulatedProjects(query: mongoose.Query<IProject[], IProjec
     }
   );
 }
-

@@ -2,6 +2,7 @@ import Task from "../models/task";
 import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
 import Epic from "../models/epic";
+import { SYSTEM_TO_DO } from "../models/status";
 
 export const listTasks = async (req: SessionRequest, res: Response) => {
   // Build a query object based on the provided filters
@@ -20,12 +21,7 @@ export const createTask = async (req: SessionRequest, res: Response) => {
 
   const newTask = new Task({
     title: req.body.title,
-    status: {
-      title: req.body.statusTitle ?? "To Do",
-      userId: userId,
-      color: req.body.statusColor ?? "#FF0000",
-      order: req.body.statusOrder ?? 1,
-    },
+    status: SYSTEM_TO_DO,
     estimateDaysToFinish: req.body.estimateDaysToFinish,
     epic: req.body.epicId,
     resource: req.body.resourceId,

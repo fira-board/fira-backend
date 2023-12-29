@@ -1,6 +1,6 @@
 import Epic from "../models/epic";
 import Task from "../models/task";
-import Status from "../models/status";
+import Status, { SYSTEM_TO_DO } from "../models/status";
 import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
 import mongoose from "mongoose";
@@ -40,12 +40,7 @@ export const createEpic = async (req: SessionRequest, res: Response) => {
 
   const newEpic = await new Epic({
     title: req.body.title,
-    status: {
-      title: req.body.statusTitle ?? "To Do",
-      userId: userId,
-      color: req.body.statusColor ?? "#FF0000",
-      order: req.body.statusOrder ?? 1,
-    },
+    status: SYSTEM_TO_DO,
     resource: req.body.resourceId,
     project: projectId,
     userId: userId,

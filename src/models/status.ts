@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 import { Document } from 'mongoose';
 
+
+export const SYSTEM_TO_DO = new mongoose.Types.ObjectId("6f43ca18574e564d919b9c1f");
+export const SYSTEM_IN_PROGRESS = new mongoose.Types.ObjectId("cdbf7f6e3fb07d7850b953b1");
+export const SYSTEM_DONE = new mongoose.Types.ObjectId("1787fac32fc603009219ad43");
+
 export interface IStatus extends Document {
   title: string;
   userId: string;
@@ -32,6 +37,5 @@ const StatusSchema = new mongoose.Schema({
     required: true
   },
 });
-
 const Status = mongoose.model<IStatus>("status", StatusSchema);
 export default Status;
