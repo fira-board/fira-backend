@@ -6,6 +6,7 @@ import epicRoutes from "./routes/epicRoutes";
 import resourceRoutes from "./routes/resourceRoutes";
 import feedbackRoutes from "./routes/feedbackRoutes";
 import suggestionRoutes from "./routes/suggestionsRoutes";
+import userRoutes from "./routes/userRoutes";
 
 import cors from "cors";
 
@@ -54,6 +55,7 @@ initializeData();
 app.use(express.json());
 app.use("/projects", projectRoutes);
 app.use("/resources", resourceRoutes);
+app.use(userRoutes);
 app.use(epicRoutes);
 app.use(taskRoutes);
 app.use(suggestionRoutes);
