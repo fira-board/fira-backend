@@ -42,7 +42,7 @@ export const getProject = async (req: SessionRequest, res: Response) => {
   const includeDeleted = req.query.includeDeleted === 'false';
 
 
-  let query: mongoose.Query<IProject | null, IProject> = Project.findById(id).where('deleted').equals(includeDeleted).populate('listOfStatus');
+  let query: mongoose.Query<IProject | null, IProject> = Project.findById(id).where('deleted').equals(includeDeleted).populate('statuses');
 
   if (fetchTasks) {
     if (includeDeleted) {
@@ -129,7 +129,7 @@ const saveToDatabase = async (projectPlan: ProjectPlan, userId: string, projectS
     name: projectPlan.name,
     description: projectPlan.description,
     prompt: projectPlan.description,
-    listOfStatus: [SYSTEM_TO_DO, SYSTEM_IN_PROGRESS, SYSTEM_DONE],
+    statuses: [SYSTEM_TO_DO, SYSTEM_IN_PROGRESS, SYSTEM_DONE],
     userId: userId,
     startDate: projectStartDate
   }).save();

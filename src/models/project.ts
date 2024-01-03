@@ -15,7 +15,7 @@ export interface IProject extends Document {
   userId: string;
   startDate: Date;
   deleted: boolean;
-  listOfStatus: Ref<IStatus>[];
+  statuses: Ref<IStatus>[];
   epics: Ref<IEpic>[];
 }
 
@@ -54,7 +54,7 @@ const ProjectSchema = new mongoose.Schema({
       ref: "epic",
     },
   ],
-  listOfStatus: [
+  statuses: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "status",

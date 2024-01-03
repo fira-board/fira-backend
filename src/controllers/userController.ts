@@ -18,8 +18,8 @@ export const getUserDetails = async (req: SessionRequest, res: Response) => {
     return res.json({
         email: userInfo.emails,
         name: userInfo.thirdParty, 
-        timeJoineds: userInfo.timeJoined, 
-    });
+        timeJoineds: userInfo.timeJoined,
+   });
     
 };
 
