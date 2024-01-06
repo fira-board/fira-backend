@@ -2,13 +2,24 @@ import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
 import ProjectUserRoles from "../models/projectUserRoles";
 import supertokens from "supertokens-node";
+import UserData from "../models/userData";
 
 export const getUserRoles = async (req: SessionRequest, res: Response) => {
   try {
-    const userRoles = await ProjectUserRoles.find({
-      projectId: req.params.projectId,
-    });
-    res.json(userRoles);
+    const userRoles = await ProjectUserRoles.find({ projectId: req.params.projectId });
+    let response = [];
+
+    for (const userRole of userRoles) {
+      const userData = await UserData.find({ userId: userRole.userId });
+
+      // Combine userRole and userData into a single object
+      response.push({
+        userRole: userRole,
+        userData: userData
+      });
+    }
+
+    res.json(response);
   } catch (err) {
     res.status(500).send(err);
   }

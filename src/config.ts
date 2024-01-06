@@ -30,7 +30,46 @@ export const SuperTokensConfig: TypeInput = {
     // recipeList contains all the modules that you want to
     // use from SuperTokens. See the full list here: https://supertokens.com/docs/guides
     recipeList: [ThirdPartyEmailPassword.init({
+        signUpFeature: {
+            formFields: [
+                { id: "email" }, 
+                { id: "password" },
+                { id: "name" },
+                { id: "profilePicture" },
+            ],
+        },
         override: {
+            apis: (originalImplementation) => {
+                return {
+                    ...originalImplementation,
+                    emailPasswordSignUpPOST: async function (input) {
+                        // First we call the original implementation of signUpPOST.
+                        let response = await originalImplementation.emailPasswordSignUpPOST!(input);
+
+                        // Post sign up response, we check if it was successful
+                        if (response.status === "OK" && response.user.loginMethods.length === 1) {
+                           
+                            // We have to iterate the formFields to find what we want
+                            let name = ""
+                            let profilePicture = ""
+                            for (let i = 0; i < input.formFields.length; i++) {
+                                if (input.formFields[i].id == "name") {
+                                    name = input.formFields[i].value
+                                }
+
+                                if (input.formFields[i].id == "profilePicture") {
+                                    profilePicture = input.formFields[i].value
+                                }
+                                
+                            }
+
+                            // Save the new user
+                            new UserData({ userId: response.user.id, allowedTokens: 4000, consumedTokens: 0, name: name, profilePicture: profilePicture }).save();
+                        }
+                        return response;
+                    }
+                }
+            },
             functions: (originalImplementation) => {
                 return {
                     ...originalImplementation,
@@ -40,14 +79,13 @@ export const SuperTokensConfig: TypeInput = {
                         password: string;
                         tenantId: string;
                         userContext: any;
+                        name: string;
+                        profilePicture: string;
                     }) => {
                         // Creating the user using the original implementation
                         const response = await originalImplementation.createNewEmailPasswordRecipeUser(input);
-
-                        if (response.status === "OK") {
-                            new UserData({ userId: response.user.id, allowedTokens: 4000, consumedTokens: 0 }).save();
-
-                        } else if (response.status === "EMAIL_ALREADY_EXISTS_ERROR") {
+                        
+                      if (response.status === "EMAIL_ALREADY_EXISTS_ERROR") {
                             // Handle the error case
                             console.log("Email already exists");
                         }

@@ -5,6 +5,8 @@ interface IUserData extends Document {
   userId: String;
   allowedTokens: number;
   consumedTokens: number;
+  name: String;
+  profilePicture: String;
 }
 
 // Create a schema corresponding to the document interface

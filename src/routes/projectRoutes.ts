@@ -1,9 +1,8 @@
 import express from "express";
 import * as projectController from "../controllers/projectController";
 import * as projectUserRolesController from "../controllers/projectUserRolesController";
-import * as userController from "../controllers/userController";
 import { verifySession } from "supertokens-node/recipe/session/framework/express";
-import { checkUserTokens, subtractUserTokens } from '../middleware/tokensMiddleware'; // Import the middleware
+import { checkUserTokens, subtractUserTokens } from '../middleware/tokensMiddleware';
 import checkPermissions from "../middleware/projectUserRoles";
 
 
@@ -21,9 +20,5 @@ router.put("/:projectId", verifySession(), checkPermissions(3), projectControlle
 router.get("/:projectId/userRoles", verifySession(), checkPermissions(1), projectUserRolesController.getUserRoles);
 router.put("/:projectId/userRoles", verifySession(), checkPermissions(3), projectUserRolesController.addUserRoles);
 router.delete("/:projectId/userRoles/:userRoleId", verifySession(), checkPermissions(3), projectUserRolesController.deleteUserRoles);
-
-//Project User Details
-router.get("/:projectId/user/", verifySession(), checkPermissions(1), userController.getProjectUserDetails);
-
 
 export default router;
