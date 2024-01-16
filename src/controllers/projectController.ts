@@ -68,7 +68,7 @@ export const createProject = async (req: SessionRequest, res: Response) => {
   let projectPlan = await generateProjectPlan(req.body.summary);
   const project = await saveToDatabase(projectPlan.data, userId, startDate);
 
-  ProjectUserRoles.create({
+  await ProjectUserRoles.create({
     projectId: project._id,
     userId: userId,
     role: 3,

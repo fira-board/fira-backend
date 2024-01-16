@@ -61,6 +61,16 @@ app.use(taskRoutes);
 app.use(suggestionRoutes);
 app.use("/feedback", feedbackRoutes);
 
+// Error handling middleware, will throw 500 error if requests throw any error
+app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  res.status(500);
+  res.json({ error: "Internal Server Error" });
+});
 
 //init server
 app.listen(PORT, () => {
