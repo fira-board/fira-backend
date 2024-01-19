@@ -29,7 +29,7 @@ const PORT = process.env.PORT || 3001;
 
 app.use(
   cors({
-    origin: ["https://firaboard.ai","http://firaboard.ai","*"],
+    origin: ["https://firaboard.ai"],
     allowedHeaders: ["content-type", ...supertokens.getAllCORSHeaders()],
     methods: ["GET", "PUT", "POST", "DELETE"],
     credentials: true,
