@@ -29,7 +29,7 @@ const PORT = process.env.PORT || 3001;
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: ["https://firaboard.ai","http://firaboard.ai","*"],
     allowedHeaders: ["content-type", ...supertokens.getAllCORSHeaders()],
     methods: ["GET", "PUT", "POST", "DELETE"],
     credentials: true,
@@ -67,7 +67,7 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
   if (res.headersSent) {
     return next(err);
   }
-
+  console.error(err.stack);
   res.status(500);
   res.json({ error: "Internal Server Error" });
 });
