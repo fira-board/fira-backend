@@ -13,7 +13,7 @@ import cors from "cors";
 import supertokens from "supertokens-node";
 import { middleware } from "supertokens-node/framework/express";
 import { SuperTokensConfig } from "./config";
-import initializeData from "./initDB";
+// import initializeData from "./initDB";
 
 
 import dotenv from "dotenv";
@@ -49,7 +49,7 @@ if (!MONGO_URI) {
 }
 
 mongoose.connect(MONGO_URI);
-initializeData();
+// initializeData();
 
 //routes
 app.use(express.json());
