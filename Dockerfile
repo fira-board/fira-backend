@@ -28,5 +28,5 @@ CMD [ "node", "dist/index.js" ]
 
 ### az login
 ### az acr login --name firarepo.azurecr.io
-### docker tag fira-backend:v0.11 firarepo.azurecr.io/fira-backend:v0.11
-### docker push firarepo.azurecr.io/fira-backend:v0.11
+### docker tag fira-backend:latest firarepo.azurecr.io/fira-backend:latest
+### docker push firarepo.azurecr.io/fira-backend:latest

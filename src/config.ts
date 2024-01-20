@@ -21,6 +21,7 @@ export const SuperTokensConfig: TypeInput = {
     supertokens: {
         // this is the location of the SuperTokens core.
         connectionURI: process.env.SUPER_TOKENS_CORE_URL || "https://try.supertokens.io",
+        apiKey: process.env.SUPER_TOKENS_API_KEY || "",
     },
     appInfo: {
         appName: process.env.APP_NAME || "Fira",
@@ -98,18 +99,10 @@ export const SuperTokensConfig: TypeInput = {
             config: {
                 thirdPartyId: "google",
                 clients: [{
-                    clientId: "1060725074195-kmeum4crr01uirfl2op9kd5acmi9jutn.apps.googleusercontent.com",
-                    clientSecret: "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"
+                    clientId: "150502140106-5c93o4uq35vejfie0p9jsmlqgqcmdgva.apps.googleusercontent.com",
+                    clientSecret: "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"
                 }]
             }
-        }, {
-            config: {
-                thirdPartyId: "github",
-                clients: [{
-                    clientId: "467101b197249757c71f",
-                    clientSecret: "e97051221f4b6426e8fe8d51486396703012f5bd"
-                }]
-            }
-        },],
+        }],
     }), Session.init(), Dashboard.init()],
 };
