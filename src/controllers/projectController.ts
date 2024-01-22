@@ -63,9 +63,11 @@ export const getProject = async (req: SessionRequest, res: Response) => {
 export const createProject = async (req: SessionRequest, res: Response) => {
   const userId = req.session!.getUserId();
   const startDate = req.body.startDate ? new Date(req.body.startDate) : new Date();
+  const model = req.model || '';
+
   startDate.setHours(0, 0, 0, 0); // Set the time to 00:00:00.000
 
-  let projectPlan = await generateProjectPlan(req.body.summary);
+  let projectPlan = await generateProjectPlan(req.body.summary, model);
   const project = await saveToDatabase(projectPlan.data, userId, startDate);
 
   await ProjectUserRoles.create({

@@ -12,12 +12,14 @@ export const suggestNewEpic = async (req: SessionRequest, res: Response) => {
     const projectId = req.query.projectId;
     const resourceId = req.query.resourceId;
     const order = req.query.order;
+    const model = req.model || '';
+
 
     const project = await Project.findById({ _id: projectId, owner: userId })!;
     const resource = await Resource.findById({ _id: resourceId, owner: userId });
 
     if (project && resource) {
-        const response = await generateEpicSugestions(project, Number(order), resource.title);
+        const response = await generateEpicSugestions(project, Number(order), resource.title, model);
         res.header("usage", response.usage);
         res.send(response.data);
 
@@ -32,12 +34,14 @@ export const suggestNewTask = async (req: SessionRequest, res: Response) => {
     const projectId = req.query.projectId;
     const epicId = req.query.epicId;
     const order = req.query.order;
+    const model = req.model || '';
+
 
     const project = await Project.findById({ _id: projectId, owner: userId })!;
     const epic = await Epic.findById({ _id: epicId, owner: userId });
 
     if (project && epic) {
-        res.send(await generateTaskSugestions(project, Number(order), epic.title));
+        res.send(await generateTaskSugestions(project, Number(order), epic.title, model));
 
     } else {
         res.status(400).send("Unauthorized");

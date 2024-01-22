@@ -1,35 +1,15 @@
-import fs from "fs";
-import path from "path";
-import dotenv from "dotenv";
-
-import { createLanguageModel, createJsonTranslator } from "fira-board-typechat";
+import { Generator } from "../genrator";
 import { ProjectPlan } from "./ProjectPlanSchema";
 
-// TODO: use local .env file.
-dotenv.config({ path: path.join(__dirname, "../../../.env") });
+const projectPlanGenerator = new Generator<ProjectPlan>("src/models/ai/project/ProjectPlanSchema.ts", "ProjectPlan");
 
-const model = createLanguageModel(process.env);
-const schema = fs.readFileSync(
-  path.join("src/models/ai/project/", "ProjectPlanSchema.ts"),
-  "utf8"
-);
-const translator = createJsonTranslator<ProjectPlan>(
-  model,
-  schema,
-  "ProjectPlan"
-);
+export const generateProjectPlan = async (summary: String, model: String) => {
 
-export const generateProjectPlan = async (summary: String) => {
   const prompt = summary.concat(
-    " be detailed as much as possible to get the best results. each plan need to have at least six epics and three tasks for each epic."
+    " be detailed as much as possible to get the best results. each plan need to have at least two resources , six epics and three tasks for each epic. "
   );
-  const response = await translator.translate(prompt);
-
-  if (!response.success) {
-    throw new Error(response.message);
-  }
-
-  return response;
+  
+  return projectPlanGenerator.call(prompt, model);
 };
 // // // Testing code :
 // function delay(ms: number) {

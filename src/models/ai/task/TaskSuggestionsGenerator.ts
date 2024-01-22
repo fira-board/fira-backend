@@ -1,36 +1,19 @@
-import fs from "fs";
-import path from "path";
-import dotenv from "dotenv";
 
-import { createLanguageModel, createJsonTranslator } from "fira-board-typechat";
 import { TaskSuggestions } from "./TaskSuggestionsSchema";
 import { IProject } from "../../../models/project";
+import { Generator } from "../genrator";
 
-// TODO: use local .env file.
-dotenv.config({ path: path.join(__dirname, "../../../.env") });
 
-const model = createLanguageModel(process.env);
-const schema = fs.readFileSync(
-  path.join("src/models/ai/task/", "TaskSuggestionsSchema.ts"),
-  "utf8"
-);
 
-const translator = createJsonTranslator<TaskSuggestions>(
-  model,
-  schema,
-  "TaskSuggestions"
-);
 
-export const generateTaskSugestions = async (projectPlan: IProject,order: number, epicName: String) => {
+const taskSuggestionsGenerator = new Generator<TaskSuggestions>("src/models/ai/task/TaskSuggestionsSchema.ts", "TaskSuggestions");
+
+
+export const generateTaskSugestions = async (projectPlan: IProject,order: number, epicName: String,model:String) => {
     const projectPlanString = JSON.stringify(projectPlan);
     let prompt:string = `this is a Json object that represnts a project plan: ${projectPlanString}  \nSuggest three new useful tasks to complete the epic goal, the epic name is (${epicName}). Keep on mind there is chronological order for the tasks in the epic. the first task is the first task in the order and the suggested task order needs to be at numeber ${order}.`;
-    
-    const response = await translator.translate(prompt);
-
-    if (!response.success) {
-      throw new Error(response.message);
-    }
-    return response;
+ 
+    return await taskSuggestionsGenerator.call(prompt,model);
 };
 
 // // Testing code :
