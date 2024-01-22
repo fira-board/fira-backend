@@ -1,4 +1,5 @@
 import express from "express";
+import promiseRouter from 'express-promise-router';
 import mongoose from "mongoose";
 import projectRoutes from "./routes/projectRoutes";
 import taskRoutes from "./routes/taskRoutes";
@@ -23,6 +24,7 @@ dotenv.config();
 supertokens.init(SuperTokensConfig);
 
 const app = express();
+const router = promiseRouter();
 
 const PORT = process.env.PORT || 3001;
 
@@ -53,17 +55,20 @@ mongoose.connect(MONGO_URI);
 
 //routes
 app.use(express.json());
-app.use("/projects", projectRoutes);
-app.use("/resources", resourceRoutes);
-app.use(userRoutes);
-app.use(epicRoutes);
-app.use(taskRoutes);
-app.use(suggestionRoutes);
-app.use("/feedback", feedbackRoutes);
 
-// Error handling middleware, will throw 500 error if requests throw any error
+// Mount your promiseRouter instance on the app
+app.use(router);
+
+router.use("/projects", projectRoutes);
+router.use("/resources", resourceRoutes);
+router.use(userRoutes);
+router.use(epicRoutes);
+router.use(taskRoutes);
+router.use(suggestionRoutes);
+router.use("/feedback", feedbackRoutes);
+
+// Error handler
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-
   if (res.headersSent) {
     return next(err);
   }
