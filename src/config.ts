@@ -99,8 +99,8 @@ export const SuperTokensConfig: TypeInput = {
             config: {
                 thirdPartyId: "google",
                 clients: [{
-                    clientId: "150502140106-5c93o4uq35vejfie0p9jsmlqgqcmdgva.apps.googleusercontent.com",
-                    clientSecret: "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"
+                    clientId: "150502140106-s71a89jop6ludf7v3l9of72kum8dmle9.apps.googleusercontent.com",
+                    clientSecret: "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"
                 }]
             }
         }],
