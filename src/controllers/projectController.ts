@@ -177,9 +177,9 @@ const saveToDatabase = async (projectPlan: ProjectPlan, userId: string, projectS
       epicDocument.save();
     });
     await Promise.all(epicPromises);
-    projectDocument.epics.push(...epics.map((epic) => epic._id));
   }
-
+  projectDocument.epics.push(...epics.map((epic) => epic._id));
+  
   return projectDocument.save();
 };
 
