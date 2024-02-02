@@ -34,10 +34,6 @@ export const getResource = async (req: SessionRequest, res: Response) => {
   res.json(resource);
 };
 
-
-
-
-
 export const createResource = async (req: SessionRequest, res: Response) => {
   const userId = req.session!.getUserId();
 

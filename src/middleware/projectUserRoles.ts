@@ -4,8 +4,8 @@ import ProjectUserRoles from "../models/projectUserRoles";
 
 function checkPermissions(requiredRole: number) {
   return async (req: SessionRequest, res: Response, next: NextFunction) => {
-    const userId = req.session!.getUserId(); // or however you retrieve the userId
-    const projectId = req.params.projectId; // or however you retrieve the projectId
+    const userId = req.session!.getUserId();
+    const projectId = req.params.projectId;
 
     const userRole = await ProjectUserRoles.findOne({ userId, projectId });
 

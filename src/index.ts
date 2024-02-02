@@ -3,6 +3,7 @@ import promiseRouter from 'express-promise-router';
 import mongoose from "mongoose";
 import projectRoutes from "./routes/projectRoutes";
 import taskRoutes from "./routes/taskRoutes";
+import activityRoutes from "./routes/activityRoutes";
 import epicRoutes from "./routes/epicRoutes";
 import resourceRoutes from "./routes/resourceRoutes";
 import feedbackRoutes from "./routes/feedbackRoutes";
@@ -64,6 +65,7 @@ router.use("/resources", resourceRoutes);
 router.use(userRoutes);
 router.use(epicRoutes);
 router.use(taskRoutes);
+router.use(activityRoutes);
 router.use(suggestionRoutes);
 router.use("/feedback", feedbackRoutes);
 

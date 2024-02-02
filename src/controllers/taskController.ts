@@ -7,7 +7,7 @@ import { SYSTEM_TO_DO } from "../models/status";
 export const listTasks = async (req: SessionRequest, res: Response) => {
   // Build a query object based on the provided filters
   const query: any = req.query;//dont let loose
-  query.projectId = req.params.projectId;
+  query.project = req.params.projectId;
   query.deleted = false;
 
   // Find tasks based on the query object
