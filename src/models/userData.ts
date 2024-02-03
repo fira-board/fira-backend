@@ -14,6 +14,7 @@ const userDataSchema: Schema = new Schema({
   userId: { type: String, required: true, unique: true },
   name: { type: String,
     required: true,
+    default: "UserName",
     validate: {
       validator: function (name: string) {
         // Regular expression for name validation contains letters,numbers and - , and it has a max of 40 characters
