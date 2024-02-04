@@ -41,5 +41,8 @@ export interface Task {
 
   // The projected number of days required to complete this task.
   estimateDaysToFinish: number;
-
+  // if the task has a positive environment impact
+  environmentalImpact: boolean;
+  //if the task has a positive social impact
+  socialImpact: boolean;
 }
