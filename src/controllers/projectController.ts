@@ -159,6 +159,8 @@ const saveToDatabase = async (projectPlan: ProjectPlan, userId: string, projectS
       const taskPromises = epic.tasks.map(async (task) => {
         const taskDocument = await new Task({
           title: task.title,
+          environmentalImpact: task.environmentalImpact,
+          socialImpact: task.socialImpact,
           estimateDaysToFinish: task.estimateDaysToFinish,
           epic: epicDocument._id,
           startDate: new Date(taskTimeline),

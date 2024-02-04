@@ -6,7 +6,7 @@ const projectPlanGenerator = new Generator<ProjectPlan>("src/models/ai/project/P
 export const generateProjectPlan = async (summary: String, model: String) => {
 
   const prompt = summary.concat(
-    " be detailed as much as possible to get the best results. each plan need to have at least two resources , six epics and three tasks for each epic. "
+    " be detailed as much as possible to get the best results. each plan need to have at least two resources , six epics and three tasks for each epic. some of the tasks may have a positive environmental or social impact."
   );
   
   return projectPlanGenerator.call(prompt, model);
@@ -24,7 +24,7 @@ export const generateProjectPlan = async (summary: String, model: String) => {
 //   console.log(tasks);
 // }
 
-// const tasks = generateProjectPlan('I want to start a company in Dubai.');
+// const tasks = generateProjectPlan('I want to start a company in Dubai.',"GPT-4");
 // run(tasks);
 
 // console.log('This will run before the 10 seconds delay!');

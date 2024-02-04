@@ -10,6 +10,9 @@ type Ref<T extends Document> = T | Types.ObjectId;
 
 export interface ITask extends Document {
   title: string;
+  description: string;
+  socialImpact: boolean;
+  environmentalImpact: boolean
   userId: string;
   status: Ref<IStatus>;
   assignedTo?: string;
@@ -27,10 +30,23 @@ const TaskSchema = new mongoose.Schema({
     type: String, required: true, validate: {
       validator: function (name: string) {
         // Regular expression for title validation contains letters,numbers and - , and it has a max of 60 characters
-        return /^[a-zA-Z0-9-,\s./]{1,60}$/.test(name);
+        return /^[a-zA-Z0-9-,\s./]{1,250}$/.test(name);
       },
       message: (props: any) => `${props.value} is not a valid title!`,
     }
+  },
+  description: {
+    type: String,
+  },
+  socialImpact: {
+    type: Boolean,
+    default: false,
+    required: true,
+  },
+  environmentalImpact: {
+    type: Boolean,
+    default: false,
+    required: true,
   },
   status: {
     type: mongoose.Schema.Types.ObjectId,
