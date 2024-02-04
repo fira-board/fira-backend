@@ -75,6 +75,28 @@ export const SuperTokensConfig: TypeInput = {
                 return {
                     ...originalImplementation,
 
+                    // Override the third-party sign-in/up function
+                    thirdPartySignInUp: async function (input: any) {
+                        // First, call the original implementation of signInUpPOST
+                        let response = await originalImplementation.thirdPartySignInUp(input);
+
+                        // Check if the sign-in/up was successful
+                        if (response.status === "OK") {
+                            // Extract user information from the response
+                            let userId = response.user.id;
+                            let name = response.rawUserInfoFromProvider.fromUserInfoAPI?.email.split('@')[0];
+                            let profilePicture = response.rawUserInfoFromProvider.fromUserInfoAPI?.picture;
+
+                            new UserData({
+                                userId: userId,
+                                allowedTokens: 4000,
+                                consumedTokens: 0,
+                                name: name,
+                                profilePicture: profilePicture
+                            }).save();
+                        }
+                        return response;
+                    },
                     createNewEmailPasswordRecipeUser: async (input: {
                         email: string;
                         password: string;

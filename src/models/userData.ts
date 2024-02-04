@@ -18,7 +18,7 @@ const userDataSchema: Schema = new Schema({
     validate: {
       validator: function (name: string) {
         // Regular expression for name validation contains letters,numbers and - , and it has a max of 40 characters
-        return /^[a-zA-Z0-9-\s]{1,40}$/.test(name);
+        return /^[a-zA-Z0-9-._+%\s]{1,40}$/.test(name);
       },
       message: (props: any) => `${props.value} is not a valid name!`,
     },},
