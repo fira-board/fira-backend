@@ -33,7 +33,7 @@ export const SuperTokensConfig: TypeInput = {
     recipeList: [ThirdPartyEmailPassword.init({
         signUpFeature: {
             formFields: [
-                { id: "email" }, 
+                { id: "email" },
                 { id: "password" },
                 { id: "name" },
                 { id: "profilePicture" },
@@ -49,7 +49,7 @@ export const SuperTokensConfig: TypeInput = {
 
                         // Post sign up response, we check if it was successful
                         if (response.status === "OK" && response.user.loginMethods.length === 1) {
-                           
+
                             // We have to iterate the formFields to find what we want
                             let name = ""
                             let profilePicture = ""
@@ -61,7 +61,7 @@ export const SuperTokensConfig: TypeInput = {
                                 if (input.formFields[i].id == "profilePicture") {
                                     profilePicture = input.formFields[i].value
                                 }
-                                
+
                             }
 
                             // Save the new user
@@ -85,8 +85,8 @@ export const SuperTokensConfig: TypeInput = {
                     }) => {
                         // Creating the user using the original implementation
                         const response = await originalImplementation.createNewEmailPasswordRecipeUser(input);
-                        
-                      if (response.status === "EMAIL_ALREADY_EXISTS_ERROR") {
+
+                        if (response.status === "EMAIL_ALREADY_EXISTS_ERROR") {
                             // Handle the error case
                             console.log("Email already exists");
                         }
@@ -101,8 +101,17 @@ export const SuperTokensConfig: TypeInput = {
                 clients: [{
                     clientId: "150502140106-s71a89jop6ludf7v3l9of72kum8dmle9.apps.googleusercontent.com",
                     clientSecret: "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"
+                }
+                ]
+            }
+        }, {
+            config: {
+                thirdPartyId: "github",
+                clients: [{
+                    clientId: "467101b197249757c71f",
+                    clientSecret: "40ca11fc5a0436a3cf7b434b99f3638b5db9bcc4"
                 }]
             }
-        }],
+        },],
     }), Session.init(), Dashboard.init()],
 };
