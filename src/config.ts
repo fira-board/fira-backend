@@ -84,15 +84,16 @@ export const SuperTokensConfig: TypeInput = {
                         if (response.status === "OK") {
                             // Extract user information from the response
                             let userId = response.user.id;
+                            let email = response.rawUserInfoFromProvider.fromUserInfoAPI?.email;
+                            let name = email.split('@')[0];
+                            let profilePicture = response.rawUserInfoFromProvider.fromUserInfoAPI?.picture;
 
                             // Check if user data already exists
-                            const existingUser = await UserData.findOne({ userId: userId });
+                            const existingUser = await UserData.findOne({ email: email });
                             if (existingUser) {
                                 return response;
                             }
 
-                            let name = response.rawUserInfoFromProvider.fromUserInfoAPI?.email.split('@')[0];
-                            let profilePicture = response.rawUserInfoFromProvider.fromUserInfoAPI?.picture;
 
                             new UserData({
                                 userId: userId,
