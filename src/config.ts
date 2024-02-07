@@ -83,17 +83,14 @@ export const SuperTokensConfig: TypeInput = {
                         // Check if the sign-in/up was successful
                         if (response.status === "OK") {
                             // Extract user information from the response
+                            if (!response.createdNewRecipeUser) {
+                                return response;
+                            }
+
                             let userId = response.user.id;
                             let email = response.rawUserInfoFromProvider.fromUserInfoAPI?.email;
                             let name = email.split('@')[0];
                             let profilePicture = response.rawUserInfoFromProvider.fromUserInfoAPI?.picture;
-
-                            // Check if user data already exists
-                            const existingUser = await UserData.findOne({ email: email });
-                            if (existingUser) {
-                                return response;
-                            }
-
 
                             new UserData({
                                 userId: userId,
@@ -131,8 +128,7 @@ export const SuperTokensConfig: TypeInput = {
                 clients: [{
                     clientId: "150502140106-s71a89jop6ludf7v3l9of72kum8dmle9.apps.googleusercontent.com",
                     clientSecret: "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"
-                }
-                ]
+                }]
             }
         }, {
             config: {
