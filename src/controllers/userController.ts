@@ -3,14 +3,15 @@ import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
 import supertokens from "supertokens-node";
 import UserData from "../models/userData";
-import multer from 'multer';
 import { BlobServiceClient } from '@azure/storage-blob';
+import dotenv from "dotenv";
+import path from "path";
+
+dotenv.config({ path: path.join(__dirname, "../.env") });
 
 
-const AZURE_STORAGE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING || "your_connection_string_here";
+const AZURE_STORAGE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING!;
 const containerName = 'profile-pictures';
-const upload = multer({ dest: 'uploads/' });
-
 const crypto = require('crypto');
 
 
@@ -59,41 +60,32 @@ export const editUserDetails = async (req: SessionRequest, res: Response) => {
     return res.json(user);
 };
 
-
+// uploadProfilePicture function is used to upload the profile picture of the user to the server
 export const uploadProfilePicture = async (req: SessionRequest, res: Response) => {
-    // Retrieve the userId from the session
     const userId = req.session!.getUserId();
+    const profilePicture = req.file;
 
-
-    // Construct the update object with inline type assertion
-    const update: { profilePicture?: string; } = {};
-
-
-    const user = await UserData.findOneAndUpdate({ userId: userId }, update);
-
-    if (!user) {
-        return res.status(404).send("User not found");
+    if (!profilePicture) {
+        return res.status(400).send("No file uploaded");
     }
 
-    return res.json(user);
-};
+    uploadProfilePictureUsingAzure(userId, profilePicture).then((url) => {
+        const update = { profilePicture: url };
+        UserData.findOneAndUpdate({ userId: userId }, update).then(() => { res.json({ profilePicture: url }) });
+    });
+}
 
+const uploadProfilePictureUsingAzure = async (userId: string, profilePicture: any) => {
+    const blobServiceClient = BlobServiceClient.fromConnectionString(AZURE_STORAGE_CONNECTION_STRING);
+    const containerClient = blobServiceClient.getContainerClient(containerName);
+    const hashedUserID = hashUserID(userId);
+    const blobName = `profile_${hashedUserID}.png`;
 
-const uploadProfilePictureUsingAzure = async (userId: string) => {
-    try {
-        const blobServiceClient = BlobServiceClient.fromConnectionString(AZURE_STORAGE_CONNECTION_STRING);
-        const containerClient = blobServiceClient.getContainerClient(containerName);
-        const hashedUserID = hashUserID(userId);
-        const blobName = `profile_${hashedUserID}.png`;
+    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
-        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
-
-        // Upload the file
-        await blockBlobClient.uploadFile("picture/");
-
-    } catch (error) {
-        console.log(error);
-    }
+    // Upload the file
+    await blockBlobClient.uploadFile(profilePicture, profilePicture.data.length);
+    return blockBlobClient.url;
 }
 
 function hashUserID(userID: string) {
