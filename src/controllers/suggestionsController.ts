@@ -36,7 +36,6 @@ export const suggestNewTask = async (req: SessionRequest, res: Response) => {
     const order = req.query.order;
     const model = req.model || '';
 
-
     const project = await Project.findById({ _id: projectId, owner: userId })!;
     const epic = await Epic.findById({ _id: epicId, owner: userId });
 
@@ -47,8 +46,6 @@ export const suggestNewTask = async (req: SessionRequest, res: Response) => {
         res.status(400).send("Unauthorized");
     }
 }
-
-
 
 export const suggestAReviewforProject = async (req: SessionRequest, res: Response) => {
     //nothing to see here for now 

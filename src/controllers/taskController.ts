@@ -1,6 +1,7 @@
 import Task from "../models/task";
 import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
+import { generateTaskDescription } from "../models/ai/task/TaskSuggestionsGenerator";
 import Epic from "../models/epic";
 import { SYSTEM_TO_DO } from "../models/status";
 
@@ -64,21 +65,23 @@ export const deleteTask = async (req: SessionRequest, res: Response) => {
 export const updateTask = async (req: SessionRequest, res: Response) => {
 
   if (req.body.startDate || req.body.endDate) {
-   if (!(req.body.startDate && req.body.endDate) || (req.body.startDate > req.body.endDate)) {
+    if (!(req.body.startDate && req.body.endDate) || (req.body.startDate > req.body.endDate)) {
       return res.status(400).send("Start Date and End Date are Required and Start Date Must be Less than End Date");
-   }
+    }
   }
 
-  const oldTask = await Task.findOne({ _id: req.params.id,
+  const oldTask = await Task.findOne({
+    _id: req.params.id,
     project: req.params.projectId,
-    deleted: false,});
+    deleted: false,
+  });
 
-    if (!oldTask) {
-      return res.status(404).send("Task not found");
-    }
+  if (!oldTask) {
+    return res.status(404).send("Task not found");
+  }
 
   const updatedTask = await Task.findOneAndUpdate(
-    { _id: req.params.id, project: req.params.projectId , deleted:false},
+    { _id: req.params.id, project: req.params.projectId, deleted: false },
     req.body,
     { new: true }
   );
@@ -87,3 +90,37 @@ export const updateTask = async (req: SessionRequest, res: Response) => {
   res.json(updatedTask);
 };
 
+export const generateDescription = async (req: SessionRequest, res: Response) => {
+  const taskId = req.params.id;
+  const userInput = req.body.userInput || '';
+  const model = req.model || '';
+
+  const task = await Task.findOne({
+    _id: taskId,
+    project: req.params.projectId,
+    deleted: false,
+  })
+    .populate({
+      path: 'epic',
+      populate: {
+        path: 'tasks',
+        match: { deleted: false },
+        select: 'title'
+      }
+    });
+
+  if (!task) {
+    res.status(404).send("Task not found");
+    return;
+  }
+
+  // Get the epics tasks titles excluding the one we are generating a description for
+  const otherTaskTitles: string[] = (task?.epic as any)?.tasks?.filter((t: any) => t._id.toString() !== task._id.toString()).map((t: any) => t.title) || [];
+
+  const response = await generateTaskDescription(task?.title, (task?.epic as any)?.title, otherTaskTitles, userInput, model);
+
+  res.header("completion_tokens", response.usage.completion_tokens);
+  res.header("prompt_tokens", response.usage.prompt_tokens);
+
+  res.json(response.data.description)
+}

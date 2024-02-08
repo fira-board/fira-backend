@@ -29,14 +29,18 @@ const TaskSchema = new mongoose.Schema({
   title: {
     type: String, required: true, validate: {
       validator: function (name: string) {
-        // Regular expression for title validation contains letters,numbers and - , and it has a max of 60 characters
         return /^[a-zA-Z0-9-,\s./]{1,250}$/.test(name);
       },
       message: (props: any) => `${props.value} is not a valid title!`,
     }
   },
   description: {
-    type: String,
+    type: String, validate: {
+      validator: function (name: string) {
+        return /^[a-zA-Z0-9-,\s./]{1,350}$/.test(name);
+      },
+      message: (props: any) => `${props.value} is not a valid description!`,
+    }
   },
   socialImpact: {
     type: Boolean,

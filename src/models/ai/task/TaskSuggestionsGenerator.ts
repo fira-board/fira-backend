@@ -3,11 +3,8 @@ import { TaskSuggestions } from "./TaskSuggestionsSchema";
 import { IProject } from "../../../models/project";
 import { Generator } from "../genrator";
 
-
-
-
 const taskSuggestionsGenerator = new Generator<TaskSuggestions>("src/models/ai/task/TaskSuggestionsSchema.ts", "TaskSuggestions");
-
+const taskDescriptionGenerator = new Generator<TaskSuggestions>("src/models/ai/task/TaskDescriptionSchema.ts", "TaskDescription");
 
 export const generateTaskSugestions = async (projectPlan: IProject,order: number, epicName: String,model:String) => {
     const projectPlanString = JSON.stringify(projectPlan);
@@ -15,6 +12,22 @@ export const generateTaskSugestions = async (projectPlan: IProject,order: number
  
     return await taskSuggestionsGenerator.call(prompt,model);
 };
+
+export const generateTaskDescription = async (taskName: string, epicName: string, otherTaskTitles: string[], userInput: string, model: string) => {
+    // Format the other task titles for inclusion in the prompt
+    const relatedTasksFormatted = otherTaskTitles.join(", ");
+    
+    let prompt = `
+    Task: "${taskName}"
+    Epic: "${epicName}"
+    Related Tasks: [${relatedTasksFormatted}]
+    Goal: "${userInput}"
+
+    Provide a user-centric description for the task, addressing the user and their team directly. Focus on explaining the task's significance, what it entails, and how it fits into the broader objectives of the "${epicName}" epic. Avoid redundancy by not repeating the task and epic names unnecessarily. Highlight the practical applications of completing this task and how it contributes to the overall project success.
+    `;
+  
+    return await taskDescriptionGenerator.call(prompt, model);
+  };
 
 // // Testing code :
 // function delay(ms: number) {
