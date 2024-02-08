@@ -36,7 +36,6 @@ export const SuperTokensConfig: TypeInput = {
                 { id: "email" },
                 { id: "password" },
                 { id: "name" },
-                { id: "profilePicture" },
             ],
         },
         override: {
@@ -52,20 +51,14 @@ export const SuperTokensConfig: TypeInput = {
 
                             // We have to iterate the formFields to find what we want
                             let name = ""
-                            let profilePicture = ""
                             for (let i = 0; i < input.formFields.length; i++) {
                                 if (input.formFields[i].id == "name") {
                                     name = input.formFields[i].value
                                 }
-
-                                if (input.formFields[i].id == "profilePicture") {
-                                    profilePicture = input.formFields[i].value
-                                }
-
                             }
 
                             // Save the new user
-                            new UserData({ userId: response.user.id, allowedTokens: 4000, consumedTokens: 0, name: name, profilePicture: profilePicture }).save();
+                            new UserData({ userId: response.user.id, allowedTokens: 4000, consumedTokens: 0, name: name }).save();
                         }
                         return response;
                     }
@@ -108,7 +101,6 @@ export const SuperTokensConfig: TypeInput = {
                         tenantId: string;
                         userContext: any;
                         name: string;
-                        profilePicture: string;
                     }) => {
                         // Creating the user using the original implementation
                         const response = await originalImplementation.createNewEmailPasswordRecipeUser(input);

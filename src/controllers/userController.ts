@@ -6,14 +6,17 @@ import UserData from "../models/userData";
 import { BlobServiceClient } from '@azure/storage-blob';
 import dotenv from "dotenv";
 import path from "path";
+import fs from "fs";
+import { promisify } from "util";
 
 dotenv.config({ path: path.join(__dirname, "../.env") });
 
 
 const AZURE_STORAGE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING!;
 const containerName = 'profile-pictures';
-const crypto = require('crypto');
 
+
+const unlinkAsync = promisify(fs.unlink);
 
 
 
@@ -66,28 +69,25 @@ export const uploadProfilePicture = async (req: SessionRequest, res: Response) =
     const profilePicture = req.file;
 
     if (!profilePicture) {
-        return res.status(400).send("No file uploaded");
+        return res.status(400).send("No file uploaded. Please upload an image of type png, jpg or jpeg and size less than 5MB");
     }
 
-    uploadProfilePictureUsingAzure(userId, profilePicture).then((url) => {
-        const update = { profilePicture: url };
-        UserData.findOneAndUpdate({ userId: userId }, update).then(() => { res.json({ profilePicture: url }) });
-    });
-}
+    console.log(`user ${userId} is uploading profile picture.`);
 
-const uploadProfilePictureUsingAzure = async (userId: string, profilePicture: any) => {
+    const url = await uploadProfilePictureUsingAzure(profilePicture);
+
+    const update = { profilePicture: url };
+    await UserData.findOneAndUpdate({ userId: userId }, update)
+    await unlinkAsync(profilePicture.path);
+    res.json({ profilePicture: url })
+};
+
+
+const uploadProfilePictureUsingAzure = async (profilePicture: any) => {
     const blobServiceClient = BlobServiceClient.fromConnectionString(AZURE_STORAGE_CONNECTION_STRING);
     const containerClient = blobServiceClient.getContainerClient(containerName);
-    const hashedUserID = hashUserID(userId);
-    const blobName = `profile_${hashedUserID}.png`;
-
-    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
-
+    const blockBlobClient = containerClient.getBlockBlobClient(profilePicture.filename);
     // Upload the file
-    await blockBlobClient.uploadFile(profilePicture, profilePicture.data.length);
+    await blockBlobClient.uploadFile(profilePicture.path);
     return blockBlobClient.url;
-}
-
-function hashUserID(userID: string) {
-    return crypto.createHash('sha256').update(userID).digest('hex');
 }
