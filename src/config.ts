@@ -1,6 +1,6 @@
 import ThirdPartyEmailPassword from "supertokens-node/recipe/thirdpartyemailpassword";
 import Session from "supertokens-node/recipe/session";
-import { TypeInput } from "supertokens-node/types";
+import {TypeInput} from "supertokens-node/types";
 import Dashboard from "supertokens-node/recipe/dashboard";
 import UserData from "./models/userData";
 
@@ -33,9 +33,9 @@ export const SuperTokensConfig: TypeInput = {
     recipeList: [ThirdPartyEmailPassword.init({
         signUpFeature: {
             formFields: [
-                { id: "email" },
-                { id: "password" },
-                { id: "name" },
+                {id: "email"},
+                {id: "password"},
+                {id: "name"},
             ],
         },
         override: {
@@ -58,7 +58,12 @@ export const SuperTokensConfig: TypeInput = {
                             }
 
                             // Save the new user
-                            new UserData({ userId: response.user.id, allowedTokens: 4000, consumedTokens: 0, name: name }).save();
+                            new UserData({
+                                userId: response.user.id,
+                                allowedTokens: 4000,
+                                consumedTokens: 0,
+                                name: name
+                            }).save();
                         }
                         return response;
                     }
@@ -118,8 +123,8 @@ export const SuperTokensConfig: TypeInput = {
             config: {
                 thirdPartyId: "google",
                 clients: [{
-                    clientId: "150502140106-s71a89jop6ludf7v3l9of72kum8dmle9.apps.googleusercontent.com",
-                    clientSecret: "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"
+                    clientId: "899178702999-l0srs2u96mqro85s07cgr2k94i8iqpq6.apps.googleusercontent.com",
+                    clientSecret: "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"
                 }]
             }
         }, {
