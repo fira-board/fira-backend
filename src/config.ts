@@ -122,10 +122,12 @@ export const SuperTokensConfig: TypeInput = {
         providers: [{
             config: {
                 thirdPartyId: "google",
-                clients: [{
-                    clientId: "150502140106-s71a89jop6ludf7v3l9of72kum8dmle9.apps.googleusercontent.com",
-                    clientSecret: "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"
-                }]
+                clients: [
+                    {
+                        clientId: "150502140106-s71a89jop6ludf7v3l9of72kum8dmle9.apps.googleusercontent.com",
+                        clientSecret: "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"
+                    }
+                ]
             }
         }, {
             config: {
