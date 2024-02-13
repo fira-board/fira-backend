@@ -25,19 +25,18 @@ const ProjectSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator: function (name: string) {
-        // Regular expression for name validation contains letters,numbers and - , and it has a max of 40 characters
-        return /^[a-zA-Z0-9-\s]{1,60}$/.test(name);
+        return /^[a-zA-Z0-9-\s@#$'"]{1,60}$/.test(name);
       },
-      message: (props: any) => `${props.value} is not a valid name!`,
+      message: (props: any) => `The name: "${props.value}" is not a valid name!`,
     },
   },
   description: {
     type: String,
     required: false,
     validate: function (description: string) {
-      // Regular expression for description validation contains letters,numbers and - , and it has a max of 100 characters
       return /^[a-zA-Z0-9-.,'\s]{1,1000}$/.test(description);
     },
+    message: (props: any) => `The name: "${props.value}" is not a valid description!`,
   },
   prompt: String,
   userId: {
