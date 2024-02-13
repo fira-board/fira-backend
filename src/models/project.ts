@@ -36,7 +36,7 @@ const ProjectSchema = new mongoose.Schema({
     required: false,
     validate: function (description: string) {
       // Regular expression for description validation contains letters,numbers and - , and it has a max of 100 characters
-      return /^[a-zA-Z0-9-.,'\s]{1,250}$/.test(description);
+      return /^[a-zA-Z0-9-.,'\s]{1,1000}$/.test(description);
     },
   },
   prompt: String,
