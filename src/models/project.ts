@@ -25,7 +25,7 @@ const ProjectSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator: function (name: string) {
-        return /^[a-zA-Z0-9-\s@#$'"]{1,60}$/.test(name);
+        return /^[a-zA-Z0-9_-\s@#$'":]{1,100}$/.test(name)
       },
       message: (props: any) => `The name: "${props.value}" is not a valid name!`,
     },
