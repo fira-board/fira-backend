@@ -122,6 +122,52 @@ export const updateProject = async (req: SessionRequest, res: Response) => {
   res.json(updated);
 };
 
+export const getProjectProgress = async (req: SessionRequest, res: Response) => {
+
+  const projectId = req.params.projectId;
+
+  const result = await Task.aggregate([
+    {
+      $match: {
+        deleted: false,
+        project: new mongoose.Types.ObjectId(projectId)
+      }
+    },
+    {
+      $group: {
+        _id: null, // Grouping key - null means group all
+        totalTasksCount: { $sum: 1 }, // Count the number "1"
+        doneTasksCount: {
+          $sum: {
+            $cond: [{ $eq: ["$status",  new mongoose.Types.ObjectId(SYSTEM_DONE)] }, 1, 0] // Count only done tasks by giving it "1" and "0" to anything else
+          }
+        }
+      }
+    }
+  ]);
+
+  let progress, doneTasksCount, totalTasksCount;
+
+  // Check if we got results
+  if (result.length > 0) {
+    doneTasksCount = result[0].doneTasksCount;
+    totalTasksCount = result[0].totalTasksCount;
+    progress = totalTasksCount > 0 ? (doneTasksCount / totalTasksCount) * 100 : 0;
+  } else {
+    // Default to 0 if no tasks found
+    progress = 0;
+    doneTasksCount = 0;
+    totalTasksCount = 0;
+  }
+
+  res.json({
+    projectId,
+    progress: progress.toFixed(2) + '%', // Format as a string with 2 decimal places
+    doneTasksCount,
+    totalTasksCount
+  });
+};
+
 const saveToDatabase = async (projectPlan: ProjectPlan, userId: string, projectStartDate: Date) => {
   let resouces = new Array();
   let epics = new Array();
@@ -181,7 +227,7 @@ const saveToDatabase = async (projectPlan: ProjectPlan, userId: string, projectS
     await Promise.all(epicPromises);
   }
   projectDocument.epics.push(...epics.map((epic) => epic._id));
-  
+
   return projectDocument.save();
 };
 
