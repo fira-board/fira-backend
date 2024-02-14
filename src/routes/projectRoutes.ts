@@ -10,6 +10,7 @@ const router = promiseRouter();
 //Project CRUD operations
 router.get("/", verifySession(), projectController.listProjects);
 router.get("/:projectId", verifySession(), checkPermissions(1), projectController.getProject);
+router.get("/:projectId/progress", verifySession(), checkPermissions(1), projectController.getProjectProgress);
 router.post("/", verifySession(), checkUserTokens, subtractUserTokens(projectController.createProject));
 router.delete("/:projectId", verifySession(), checkPermissions(3), projectController.deleteProject);
 router.put("/:projectId", verifySession(), checkPermissions(3), projectController.updateProject);
