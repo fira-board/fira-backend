@@ -1,6 +1,6 @@
 import Epic from "../models/epic";
 import Task from "../models/task";
-import Status, { SYSTEM_TO_DO } from "../models/status";
+import { SYSTEM_TO_DO } from "../models/status";
 import { Response } from "express";
 import { SessionRequest } from "supertokens-node/framework/express";
 import mongoose from "mongoose";
@@ -10,8 +10,12 @@ import Project from "../models/project";
 export const listEpics = async (req: SessionRequest, res: Response) => {
   const fetchTasks = req.query.fetch === 'true';
   const includeDeleted = req.query.includeDeleted === 'true';
+  const filters: any = req.query;//dont let loose
+  filters.project = req.params.projectId;
+  filters.deleted = fetchTasks;
 
-  let query: mongoose.Query<IEpic[], IEpic> = Epic.find({}).populate('resource').where('deleted').equals(includeDeleted);
+
+  let query: mongoose.Query<IEpic[], IEpic> = Epic.find(filters).populate('resource').where('deleted').equals(includeDeleted);
 
   if (fetchTasks) {
     if (includeDeleted) {
@@ -109,40 +113,16 @@ export const updateEpic = async (req: SessionRequest, res: Response) => {
 
   const epicId = req.params.id;
   const projectId = req.params.projectId;
-  let statusId = req.body.status;
+  const { title, resourceId } = req.body;
 
-  // Check if there's new status data to create or update the status
-  if (req.body.statusId) {
-    const existingStatus = await Status.findOne({ _id: req.body.statusTitle });
-
-    if (!existingStatus)
-      return res.status(404).send("Status not found");
-
-    // Create or update the status
-    const statusUpdate = {
-      title: req.body.statusTitle ?? existingStatus.title,
-      color: req.body.statusColor ?? existingStatus.color,
-      order: req.body.statusOrder ?? existingStatus.order,
-    };
-
-    const status = existingStatus
-      ? await Status.findByIdAndUpdate(existingStatus._id, statusUpdate, { new: true })
-      : await new Status({ ...statusUpdate, userId: req.session!.getUserId() }).save();
-
-    statusId = status?._id;
-  }
-
-  // Prepare update data for Epic
-  const updatedData = {
-    title: req.body.title,
-    status: statusId,
-    resource: req.body.resourceId,
-  };
+  const update = {} as any;
+  if (title !== undefined) update.title = title;
+  if (resourceId !== undefined) update.resourceId = resourceId;
 
   // Update the Epic
   const updated = await Epic.findOneAndUpdate(
-    { _id: epicId, project: projectId, deleted: false }, 
-    updatedData, 
+    { _id: epicId, project: projectId, deleted: false },
+    update,
     { new: true }
   ).lean();
 

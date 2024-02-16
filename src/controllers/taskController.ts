@@ -7,12 +7,13 @@ import { SYSTEM_TO_DO } from "../models/status";
 
 export const listTasks = async (req: SessionRequest, res: Response) => {
   // Build a query object based on the provided filters
-  const query: any = req.query;//dont let loose
-  query.project = req.params.projectId;
-  query.deleted = false;
+  const includeDeleted = req.query.includeDeleted === 'true';
+  const filters: any = req.query;//dont let loose
+  filters.project = req.params.projectId;
+  filters.deleted = includeDeleted;
 
   // Find tasks based on the query object
-  const tasks = await Task.find(query).populate("resource").populate("epic");
+  const tasks = await Task.find(filters).populate("resource").populate("epic");
 
   res.json(tasks);
 };
@@ -20,7 +21,7 @@ export const listTasks = async (req: SessionRequest, res: Response) => {
 export const createTask = async (req: SessionRequest, res: Response) => {
   const userId = req.session!.getUserId();
 
-  const newTask = new Task({
+  const newTask = await new Task({
     title: req.body.title,
     status: SYSTEM_TO_DO,
     estimateDaysToFinish: req.body.estimateDaysToFinish,
@@ -29,6 +30,8 @@ export const createTask = async (req: SessionRequest, res: Response) => {
     project: req.params.projectId,
     userId: userId,
   }).save();
+
+  await Epic.updateOne({ _id: req.body.epicId }, { $push: { tasks: newTask._id } });
 
   res.status(201).json(newTask);
 };
@@ -64,8 +67,21 @@ export const deleteTask = async (req: SessionRequest, res: Response) => {
 
 export const updateTask = async (req: SessionRequest, res: Response) => {
 
-  if (req.body.startDate || req.body.endDate) {
-    if (!(req.body.startDate && req.body.endDate) || (req.body.startDate > req.body.endDate)) {
+  // Extract the fields from the request body
+  const { title, description, status, assignedTo, startDate, endDate, epic } = req.body;
+
+  // Create a new object that only includes the fields if they exist in the request body
+  const update = {} as any;
+  if (title !== undefined) update.title = title;
+  if (description !== undefined) update.description = description;
+  if (status !== undefined) update.status = status;
+  if (assignedTo !== undefined) update.assignedTo = assignedTo;
+  if (startDate !== undefined) update.startDate = startDate;
+  if (endDate !== undefined) update.endDate = endDate;
+  if (epic !== undefined) update.epic = epic;
+
+  if (startDate || endDate) {
+    if (!(startDate && endDate) || (startDate > endDate)) {
       return res.status(400).send("Start Date and End Date are Required and Start Date Must be Less than End Date");
     }
   }
@@ -80,11 +96,7 @@ export const updateTask = async (req: SessionRequest, res: Response) => {
     return res.status(404).send("Task not found");
   }
 
-  const updatedTask = await Task.findOneAndUpdate(
-    { _id: req.params.id, project: req.params.projectId, deleted: false },
-    req.body,
-    { new: true }
-  );
+  const updatedTask = await oldTask?.updateOne(update);
 
   console.debug("Task updated successfully");
   res.json(updatedTask);

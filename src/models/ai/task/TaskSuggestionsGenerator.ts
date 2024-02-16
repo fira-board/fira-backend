@@ -8,7 +8,7 @@ const taskDescriptionGenerator = new Generator<TaskSuggestions>("src/models/ai/t
 
 export const generateTaskSugestions = async (projectPlan: IProject,order: number, epicName: String,model:String) => {
     const projectPlanString = JSON.stringify(projectPlan);
-    let prompt:string = `this is a Json object that represnts a project plan: ${projectPlanString}  \nSuggest three new useful tasks to complete the epic goal, the epic name is (${epicName}). Keep on mind there is chronological order for the tasks in the epic. the first task is the first task in the order and the suggested task order needs to be at numeber ${order}.`;
+    let prompt:string = `this is a Json object that represnts a project plan: ${projectPlanString}  \nSuggest three new useful tasks to complete this epic goal, the epic name is (${epicName}). Keep on mind there is chronological order for the tasks in the epic. the first task is the first task in the order and the suggested task order needs to be at numeber ${order}.`;
  
     return await taskSuggestionsGenerator.call(prompt,model);
 };
