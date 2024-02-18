@@ -122,50 +122,59 @@ export const updateProject = async (req: SessionRequest, res: Response) => {
   res.json(updated);
 };
 
-export const getProjectProgress = async (req: SessionRequest, res: Response) => {
-
-  const projectId = req.params.projectId;
+export const getAllProjectsProgress = async (req: SessionRequest, res: Response) => {
+  const userId = req.session!.getUserId();
 
   const result = await Task.aggregate([
     {
       $match: {
         deleted: false,
-        project: new mongoose.Types.ObjectId(projectId)
+        userId: userId
       }
     },
     {
       $group: {
-        _id: null, // Grouping key - null means group all
-        totalTasksCount: { $sum: 1 }, // Count the number "1"
+        _id: '$project', // Group by project
+        totalTasksCount: { $sum: 1 },
         doneTasksCount: {
           $sum: {
-            $cond: [{ $eq: ["$status",  new mongoose.Types.ObjectId(SYSTEM_DONE)] }, 1, 0] // Count only done tasks by giving it "1" and "0" to anything else
+            $cond: [{ $eq: ["$status", new mongoose.Types.ObjectId(SYSTEM_DONE)] }, 1, 0]
           }
         }
+      }
+    },
+    {
+      $lookup: { 
+        from: 'projects',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'projectDetails'
+      }
+    },
+    {
+      $project: { // Format the output
+        _id: 0,
+        project: '$_id',
+        projectDetails: { $arrayElemAt: ['$projectDetails', 0] }, // Flatten the project details
+        progress: {
+          $cond: [{ $gt: ['$totalTasksCount', 0] }, { $multiply: [{ $divide: ['$doneTasksCount', '$totalTasksCount'] }, 100] }, 0]
+        },
+        doneTasksCount: 1,
+        totalTasksCount: 1
       }
     }
   ]);
 
-  let progress, doneTasksCount, totalTasksCount;
+  // Format the results for response
+  const projectsProgress = result.map(item => ({
+    projectId: item.project,
+    projectName: item.projectDetails ? item.projectDetails.name : "Unknown",
+    progress: item.progress.toFixed(2) + '%',
+    doneTasksCount: item.doneTasksCount,
+    totalTasksCount: item.totalTasksCount
+  }));
 
-  // Check if we got results
-  if (result.length > 0) {
-    doneTasksCount = result[0].doneTasksCount;
-    totalTasksCount = result[0].totalTasksCount;
-    progress = totalTasksCount > 0 ? (doneTasksCount / totalTasksCount) * 100 : 0;
-  } else {
-    // Default to 0 if no tasks found
-    progress = 0;
-    doneTasksCount = 0;
-    totalTasksCount = 0;
-  }
-
-  res.json({
-    projectId,
-    progress: progress.toFixed(2) + '%', // Format as a string with 2 decimal places
-    doneTasksCount,
-    totalTasksCount
-  });
+  res.json(projectsProgress);
 };
 
 const saveToDatabase = async (projectPlan: ProjectPlan, userId: string, projectStartDate: Date) => {
