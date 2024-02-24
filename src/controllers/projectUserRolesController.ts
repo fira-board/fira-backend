@@ -90,7 +90,7 @@ export const addUserRoles = async (req: SessionRequest, res: Response) => {
 
       if (userProjectRole)
         return {
-          response: "HAS_ROLE",
+          status: "HAS_ROLE",
           id: role.userId,
         };
 
@@ -100,7 +100,7 @@ export const addUserRoles = async (req: SessionRequest, res: Response) => {
         role: role.role,
       });
       return {
-        response: "ADDED",
+        status: "ADDED",
         id: role.userId,
       };
 
@@ -108,7 +108,7 @@ export const addUserRoles = async (req: SessionRequest, res: Response) => {
       console.log("sending invite by : ", userId);
       sendInvite(userData!.name, project!.name, role.email);
       return {
-        response: "EMAIL_SENT",
+        status: "EMAIL_SENT",
         id: role.email,
       };
     }
