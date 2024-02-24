@@ -66,6 +66,11 @@ export const deleteUserRoles = async (req: SessionRequest, res: Response) => {
 export const addUserRoles = async (req: SessionRequest, res: Response) => {
   const roles = req.body.roles;
   const userId = req.session!.getUserId();
+
+  if (roles.length === 0) {
+    return res.status(400).send("No roles provided");
+  }
+
   const project = await Project.findById(req.params.projectId);
   const userData = await UserData.findOne({ userId: userId });
 
