@@ -3,6 +3,8 @@ import { SessionRequest } from "supertokens-node/framework/express";
 import ProjectUserRoles from "../models/projectUserRoles";
 import supertokens from "supertokens-node";
 import UserData from "../models/userData";
+import { sendInvite } from "../services/emailService";
+import Project from "../models/project";
 
 export const getUserRoles = async (req: SessionRequest, res: Response) => {
   try {
@@ -62,27 +64,55 @@ export const deleteUserRoles = async (req: SessionRequest, res: Response) => {
 };
 
 export const addUserRoles = async (req: SessionRequest, res: Response) => {
-  try {
-    const roles = req.body.roles;
+  const roles = req.body.roles;
+  const userId = req.session!.getUserId();
+  const project = await Project.findById(req.params.projectId);
+  const userData = await UserData.findOne({ userId: userId });
 
-    roles.forEach(async (role: any) => {
-      let usersInfo = await supertokens.listUsersByAccountInfo("public", {
-        email: role.email,
-      });
+  if (!project) {
+    return res.status(404).send("Project Not Found");
+  }
+  if (!userData) {
+    return res.status(404).send("User Not Found");
+  }
 
-      if (usersInfo.length > 0) {
-        await ProjectUserRoles.create({
-          projectId: req.params.projectId,
-          userId: usersInfo[0].id,
-          role: role.role,
-        });
-      } else {
-        // TODO: send email invite
-      }
+  const response = await Promise.all(roles.map(async (role: any) => {
+    let usersInfo = await supertokens.listUsersByAccountInfo("public", {
+      email: role.email,
     });
 
-    res.status(201).send();
-  } catch (err) {
-    res.status(500).send(err);
-  }
+    if (usersInfo.length > 0) {
+
+      const userProjectRole = await ProjectUserRoles.findOne({
+        projectId: req.params.projectId,
+        userId: usersInfo[0].id,
+      });
+
+      if (userProjectRole)
+        return {
+          response: "HAS_ROLE",
+          id: role.userId,
+        };
+
+      await ProjectUserRoles.create({
+        projectId: req.params.projectId,
+        userId: usersInfo[0].id,
+        role: role.role,
+      });
+      return {
+        response: "ADDED",
+        id: role.userId,
+      };
+
+    } else {
+      console.log("sending invite by : ", userId);
+      sendInvite(userData!.name, project!.name, role.email);
+      return {
+        response: "EMAIL_SENT",
+        id: role.email,
+      };
+    }
+  }));
+
+  res.status(200).send(response);
 };

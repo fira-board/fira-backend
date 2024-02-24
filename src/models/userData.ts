@@ -2,18 +2,18 @@ import mongoose, { Schema, Document } from "mongoose";
 
 // Interface to represent a document in MongoDB
 interface IUserData extends Document {
-  userId: String;
+  userId: string;
   allowedTokens: number;
   consumedTokens: number;
-  name: String;
-  profilePicture: String;
+  name: string;
+  profilePicture: string;
 }
 
 // Create a schema corresponding to the document interface
 const userDataSchema: Schema = new Schema({
   userId: { type: String, required: true, unique: true },
   name: { type: String,
-    required: false,
+    required: true,
     validate: {
       validator: function (name: string) {
         // Regular expression for name validation contains letters,numbers and - , and it has a max of 40 characters
