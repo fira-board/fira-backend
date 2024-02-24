@@ -16,6 +16,7 @@ router.get("/progress", verifySession(), projectController.getAllProjectsProgres
 
 // Now the general :projectId routes
 router.get("/:projectId", verifySession(), checkPermissions(1), projectController.getProject);
+router.get("/:projectId/progress", verifySession(), checkPermissions(1), projectController.getProjectProgress);
 router.delete("/:projectId", verifySession(), checkPermissions(3), projectController.deleteProject);
 router.put("/:projectId", verifySession(), checkPermissions(3), projectController.updateProject);
 
