@@ -6,6 +6,7 @@ interface IUserData extends Document {
   allowedTokens: number;
   consumedTokens: number;
   name: String;
+  subscriptionStatus: number;
   profilePicture: String;
 }
 
@@ -21,6 +22,12 @@ const userDataSchema: Schema = new Schema({
       },
       message: (props: any) => `${props.value} is not a valid name!`,
     },},
+    subscriptionStatus: {
+      type: Number,
+      required: true,
+      default: 0, // 0 is free, 1 for first package, 2 for premium
+      enum: [0, 1, 2]
+  },
   profilePicture: { type: String, required: false },
   allowedTokens: { type: Number, required: true },
   consumedTokens: { type: Number, required: true },

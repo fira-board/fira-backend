@@ -1,5 +1,6 @@
 import express from "express";
 import * as userController from "../controllers/userController";
+import * as paymentController from "../controllers/paymentController";
 import { verifySession } from "supertokens-node/recipe/session/framework/express";
 import multer from 'multer';
 
@@ -16,5 +17,8 @@ const upload = multer({ dest: 'uploads/' , limits: { fileSize: 5*1024*1024 }, fi
 router.get("/user/", verifySession(), userController.getUserDetails);
 router.put("/user/", verifySession(), userController.editUserDetails);
 router.post("/user/profilePicture", verifySession(), upload.single('profilePicture'),userController.uploadProfilePicture);
+
+// New Payment
+router.post("/purchase/", verifySession(), paymentController.createPurchase);
 
 export default router;
