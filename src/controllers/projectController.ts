@@ -39,7 +39,7 @@ export const listProjects = async (req: SessionRequest, res: Response) => {
 export const getProject = async (req: SessionRequest, res: Response) => {
   const id = req.params.projectId;
   const fetchTasks = req.query.fetch === 'true';
-  const includeDeleted = req.query.includeDeleted === 'false';
+  const includeDeleted = req.query.includeDeleted === 'true';
 
 
   let query: mongoose.Query<IProject | null, IProject> = Project.findById(id).where('deleted').equals(includeDeleted).populate('statuses');
