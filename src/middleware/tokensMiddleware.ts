@@ -36,18 +36,21 @@ const checkUserTokens = async (req: SessionRequest, res: Response, next: NextFun
 function subtractUserTokens(handler: (req: SessionRequest, res: Response, next: NextFunction) => Promise<void>) {
     return async (req: SessionRequest, res: Response, next: NextFunction) => {
         await handler(req, res, next);
-        const userId = req.session!.getUserId(); // Assuming you're getting the user ID from the session
+        const userId = req.session!.getUserId();
 
         const user = await UserData.findOne({ userId: userId });
 
         if (!user) {
             return res.status(404).send('User not found');
         }
-        const usageHeader = res.getHeader('completion_tokens');
-        if (!usageHeader)
+
+        const completionUsageHeader = res.getHeader('completion_tokens');
+        const promptUsageHeader = res.getHeader('prompt_tokens');
+
+        if (!completionUsageHeader && !promptUsageHeader)
             next();
 
-        const usage = Number(usageHeader);
+        const usage = Number(completionUsageHeader) + Number(promptUsageHeader);
         user.consumedTokens += usage;
         user.allowedTokens -= usage;
         await user.save();
