@@ -1,5 +1,5 @@
 import supertest from 'supertest';
-import {app} from '../../src/index'; // Import your Express app here
+import { app } from '../../src/index'; // Import your Express app here
 
 
 
@@ -36,7 +36,7 @@ describe('POST /auth/signin', () => {
                 ],
             });
         expect(response.status).toBe(400);
-        expect(response.body.message).toBe("Are you sending too many / too few formFields?"); 
+        expect(response.body.message).toBe("Are you sending too many / too few formFields?");
     });
 
     it('should return an error for missing password', async () => {
@@ -49,7 +49,7 @@ describe('POST /auth/signin', () => {
                 ],
             });
         expect(response.status).toBe(400);
-        expect(response.body.message).toBe("Are you sending too many / too few formFields?"); 
+        expect(response.body.message).toBe("Are you sending too many / too few formFields?");
     });
 
     it('should return an error for incorrect email or password', async () => {

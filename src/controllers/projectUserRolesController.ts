@@ -67,8 +67,21 @@ export const addUserRoles = async (req: SessionRequest, res: Response) => {
   const roles = req.body.roles;
   const userId = req.session!.getUserId();
 
+  //check if the roles is valid, check if the email is valid
+
+
   if (roles.length === 0) {
     return res.status(400).send("No roles provided");
+  }
+
+  for (let i = 0; i < roles.length; i++) {
+    if (roles[i].role < 1 || roles[i].role > 3) {
+      return res.status(400).send("Invalid role");
+    }
+
+    if (!roles[i].email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      return res.status(400).send("Invalid email");
+    }
   }
 
   const project = await Project.findById(req.params.projectId);
@@ -88,25 +101,19 @@ export const addUserRoles = async (req: SessionRequest, res: Response) => {
 
     if (usersInfo.length > 0) {
 
-      const userProjectRole = await ProjectUserRoles.findOne({
+      // create or update the role
+      await ProjectUserRoles.findOneAndUpdate({
         projectId: req.params.projectId,
         userId: usersInfo[0].id,
-      });
-
-      if (userProjectRole)
-        return {
-          status: "HAS_ROLE",
-          id: role.userId,
-        };
-
-      await ProjectUserRoles.create({
-        projectId: req.params.projectId,
-        userId: usersInfo[0].id,
+      }, {
         role: role.role,
+      }, {
+        upsert: true, // this will create a new document if no documents match the filter
       });
+
       return {
-        status: "ADDED",
-        id: role.userId,
+        status: "UPDATED",
+        id: role.email,
       };
 
     } else {

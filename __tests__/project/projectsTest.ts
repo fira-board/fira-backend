@@ -1,6 +1,6 @@
 import supertest from 'supertest';
 import { app } from '../../src/index'; // Import your Express app here
-
+import AuthHelper from '../helpers/authHelper';
 
 const request = supertest(app);
 let cookie: string;
@@ -8,20 +8,8 @@ let cookie: string;
 
 // Shared sign-in before running tests
 beforeAll(async () => {
-    const response = await request
-        .post('/auth/signin')
-        .set('sec-ch-ua', '"Microsoft Edge";v="113", "Chromium";v="113", "Not-A.Brand";v="24"')
-        .set('fdi-version', '1.16')
-        .set('st-auth-mode', 'cookie')
-        .set('content-type', 'application/json')
-        .set('rid', 'thirdpartyemailpassword')
-        .send({
-            formFields: [
-                { id: 'email', value: 'h.123@gmail.com' },
-                { id: 'password', value: 'hamza123' },
-            ],
-        });
-    cookie = response.headers['set-cookie'][0];
+    const authInstance = AuthHelper.getInstance();
+    cookie = await authInstance.signIn();
 });
 
 describe('Projects Endpoints', () => {
