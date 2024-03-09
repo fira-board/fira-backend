@@ -48,7 +48,7 @@ describe('UserData Endpoints', () => {
             expect(response.body).toHaveProperty('__v');
 
             const redoResponse = await request.put('/user/')
-                .send({ name: "hamza" })
+                .send({ name: "TestNewName" })
                 .set('Content-Type', 'application/json')
                 .set('Cookie', cookie)
                 .expect(200); // Expecting successful response
