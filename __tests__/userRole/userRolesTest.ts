@@ -65,6 +65,7 @@ describe('UserRoles Endpoints', () => {
     describe('GET /projects/:projectId/userRoles', () => {
         it('should return user roles for the project with corresponding user data', async () => {
             const response = await request.get(`/projects/${projectId}/userRoles`)
+                .set('Cookie', cookie)
                 .expect(200); // Expecting successful response
 
             // Check if the response is an array

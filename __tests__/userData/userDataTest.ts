@@ -10,20 +10,20 @@ beforeAll(async () => {
     const authInstance = AuthHelper.getInstance();
     cookie = await authInstance.signIn();
 });
+
 describe('UserData Endpoints', () => {
-
-
 
     describe('GET /user/', () => {
         it('should return user details', async () => {
             const response = await request.get('/user/')
+                .set('Cookie', cookie)
                 .expect(200); // Check for successful response
 
             // Validate the response structure
             expect(response.body).toHaveProperty('email');
             expect(Array.isArray(response.body.email)).toBeTruthy();
             expect(response.body.email).toContain('h.123@gmail.com');
-            expect(response.body).toHaveProperty('name', 'hamza');
+            expect(response.body).toHaveProperty('name', 'TestNewName');
             expect(response.body).toHaveProperty('timeJoineds');
             expect(typeof response.body.timeJoineds).toBe('number');
         });
@@ -36,15 +36,32 @@ describe('UserData Endpoints', () => {
             const response = await request.put('/user/')
                 .send({ name: "TestNewName" })
                 .set('Content-Type', 'application/json')
+                .set('Cookie', cookie)
                 .expect(200); // Expecting successful response
 
             // Validate response structure
             expect(response.body).toHaveProperty('_id');
             expect(response.body).toHaveProperty('userId');
-            expect(response.body).toHaveProperty('name'); // Check if the name is updated
+            expect(response.body).toHaveProperty('name', "TestNewName"); // Check if the name is updated
             expect(response.body).toHaveProperty('allowedTokens');
             expect(response.body).toHaveProperty('consumedTokens');
             expect(response.body).toHaveProperty('__v');
+
+            const redoResponse = await request.put('/user/')
+                .send({ name: "hamza" })
+                .set('Content-Type', 'application/json')
+                .set('Cookie', cookie)
+                .expect(200); // Expecting successful response
+
+            // Validate response structure
+            expect(redoResponse.body).toHaveProperty('_id');
+            expect(redoResponse.body).toHaveProperty('userId');
+            expect(response.body).toHaveProperty('name', "TestNewName"); // Check if the name is updated
+            expect(redoResponse.body).toHaveProperty('allowedTokens');
+            expect(redoResponse.body).toHaveProperty('consumedTokens');
+            expect(redoResponse.body).toHaveProperty('__v');
+
+
         });
 
     });
