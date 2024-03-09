@@ -14,7 +14,7 @@ beforeAll(async () => {
     // Here, use an existing project ID or create a new project and get its ID
     projectId = '65e2721bfc14b1298142691d'; // Replace with dynamic ID if necessary
 });
-describe('UserData Endpoints', () => {
+describe('UserRoles Endpoints', () => {
 
     describe('PUT /projects/:id/userRoles', () => {
         it('should update user roles successfully', async () => {
@@ -61,4 +61,34 @@ describe('UserData Endpoints', () => {
     })
 
 
+
+    describe('GET /projects/:projectId/userRoles', () => {
+        it('should return user roles for the project with corresponding user data', async () => {
+            const response = await request.get(`/projects/${projectId}/userRoles`)
+                .expect(200); // Expecting successful response
+
+            // Check if the response is an array
+            expect(Array.isArray(response.body)).toBeTruthy();
+
+            // Check if the response contains userRole and userData objects
+            response.body.forEach((item: { userRole: any; userData: any[] }) => {
+                expect(item).toHaveProperty('userRole');
+                expect(item.userRole).toHaveProperty('_id');
+                expect(item.userRole).toHaveProperty('projectId');
+                expect(item.userRole).toHaveProperty('userId');
+                expect(item.userRole).toHaveProperty('role');
+                expect(item.userRole).toHaveProperty('projectIsDeleted');
+
+                expect(item).toHaveProperty('userData');
+                expect(Array.isArray(item.userData)).toBeTruthy();
+                item.userData.forEach(userData => {
+                    expect(userData).toHaveProperty('_id');
+                    expect(userData).toHaveProperty('userId');
+                    expect(userData).toHaveProperty('name');
+                });
+            });
+        });
+    });
+
+    // Add more tests as necessary for different endpoints
 });
