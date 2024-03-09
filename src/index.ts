@@ -24,10 +24,10 @@ dotenv.config();
 
 supertokens.init(SuperTokensConfig);
 
-const app = express();
+export const app = express();
 const router = promiseRouter();
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.NODE_ENV === 'test' ? 0 : process.env.PORT;
 
 
 app.use(

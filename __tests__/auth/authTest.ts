@@ -1,10 +1,13 @@
-import request from 'supertest';
+import supertest from 'supertest';
+import {app} from '../../src/index'; // Import your Express app here
 
-const baseURL = 'http://localhost:3001';
+
 
 describe('POST /auth/signin', () => {
+    const request = supertest(app);
+
     it('should sign in successfully with correct credentials', async () => {
-        const response = await request(baseURL)
+        const response = await request
             .post('/auth/signin')
             .set('sec-ch-ua', '"Microsoft Edge";v="113", "Chromium";v="113", "Not-A.Brand";v="24"')
             .set('fdi-version', '1.16')
@@ -24,7 +27,7 @@ describe('POST /auth/signin', () => {
     });
 
     it('should return an error for missing email', async () => {
-        const response = await request(baseURL)
+        const response = await request
             .post('/auth/signin')
             .set('content-type', 'application/json')
             .send({
@@ -37,7 +40,7 @@ describe('POST /auth/signin', () => {
     });
 
     it('should return an error for missing password', async () => {
-        const response = await request(baseURL)
+        const response = await request
             .post('/auth/signin')
             .set('content-type', 'application/json')
             .send({
@@ -50,7 +53,7 @@ describe('POST /auth/signin', () => {
     });
 
     it('should return an error for incorrect email or password', async () => {
-        const response = await request(baseURL)
+        const response = await request
             .post('/auth/signin')
             .set('content-type', 'application/json')
             .send({
