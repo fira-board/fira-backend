@@ -4,15 +4,11 @@ import AuthHelper from '../helpers/authHelper';
 
 const request = supertest(app);
 let cookie: string;
-let projectId: string;
 
 // Shared setup, like signing in and creating/getting a project
 beforeAll(async () => {
     const authInstance = AuthHelper.getInstance();
     cookie = await authInstance.signIn();
-
-    // Here, use an existing project ID or create a new project and get its ID
-    projectId = '65e2721bfc14b1298142691d'; // Replace with dynamic ID if necessary
 });
 describe('UserData Endpoints', () => {
 
