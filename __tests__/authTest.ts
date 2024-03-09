@@ -32,8 +32,8 @@ describe('POST /auth/signin', () => {
                     { id: 'password', value: 'hamza123' }, // Missing email
                 ],
             });
-        expect(response.status).not.toBe(200);
-        expect(response.body.error).toBeDefined(); 
+        expect(response.status).toBe(400);
+        expect(response.body.message).toBe("Are you sending too many / too few formFields?"); 
     });
 
     it('should return an error for missing password', async () => {
@@ -45,8 +45,8 @@ describe('POST /auth/signin', () => {
                     { id: 'email', value: 'h.123@gmail.com' }, // Missing password
                 ],
             });
-        expect(response.status).not.toBe(200);
-        expect(response.body.error).toBeDefined(); 
+        expect(response.status).toBe(400);
+        expect(response.body.message).toBe("Are you sending too many / too few formFields?"); 
     });
 
     it('should return an error for incorrect email or password', async () => {
@@ -59,8 +59,8 @@ describe('POST /auth/signin', () => {
                     { id: 'password', value: 'wrongPassword' },
                 ],
             });
-        expect(response.status).not.toBe(200);
-        expect(response.body.error).toBeDefined();
+        expect(response.status).toBe(200);
+        expect(response.body.status).toBe("WRONG_CREDENTIALS_ERROR");
     });
 
     // Add more tests as necessary for different error scenarios and edge cases
