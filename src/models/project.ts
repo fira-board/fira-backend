@@ -23,21 +23,11 @@ const ProjectSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    validate: {
-      validator: function (name: string) {
-        return /^[a-zA-Z0-9_-\s@#$'":]{1,100}$/.test(name)
-      },
-      message: (props: any) => `The name: "${props.value}" is not a valid name!`,
-    },
   },
   description: {
     type: String,
     required: false,
-    validate: function (description: string) {
-      return /^[a-zA-Z0-9-.,'\s]{1,1000}$/.test(description);
-    },
-    message: (props: any) => `The name: "${props.value}" is not a valid description!`,
-  },
+      },
   prompt: String,
   userId: {
     type: String,

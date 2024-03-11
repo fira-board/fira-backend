@@ -14,7 +14,7 @@ RUN npm install -g typescript
 # Step 5: Copy source code
 COPY . .
 
-COPY src/.env ./dist/.env
+COPY src/.env ./dist/src/.env
 
 ENV PORT=80
 # Step 6: Compile TypeScript to JavaScript
@@ -23,7 +23,7 @@ EXPOSE 80
 
 
 # Step 7: Start the application
-CMD [ "node", "dist/index.js" ]
+CMD [ "node", "dist/src/index.js" ]
 
 
 ### az login

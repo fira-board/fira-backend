@@ -27,20 +27,10 @@ export interface ITask extends Document {
 
 const TaskSchema = new mongoose.Schema({
   title: {
-    type: String, required: true, validate: {
-      validator: function (name: string) {
-        return /^[a-zA-Z0-9-,\s./]{1,250}$/.test(name);
-      },
-      message: (props: any) => `${props.value} is not a valid title!`,
-    }
+    type: String, required: true,
   },
   description: {
-    type: String, validate: {
-      validator: function (name: string) {
-        return /^[a-zA-Z0-9-,\s./]{1,350}$/.test(name);
-      },
-      message: (props: any) => `${props.value} is not a valid description!`,
-    }
+    type: String, 
   },
   socialImpact: {
     type: Boolean,
