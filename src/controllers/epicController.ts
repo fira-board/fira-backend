@@ -54,7 +54,7 @@ export const createEpic = async (req: SessionRequest, res: Response) => {
   project.epics.push(newEpic._id);
   await project.save();
 
-  res.json(newEpic);
+  res.status(201).json(newEpic);
 };
 
 export const getEpic = async (req: SessionRequest, res: Response) => {

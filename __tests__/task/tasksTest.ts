@@ -42,7 +42,7 @@ describe('Tasks Endpoints', () => {
                 expect(task).toHaveProperty('deleted');
                 expect(task).toHaveProperty('epic');
                 expect(task).toHaveProperty('resource');
-                expect(task).toHaveProperty('project');
+                expect(task).toHaveProperty('project', projectId);
             });
         });
 
