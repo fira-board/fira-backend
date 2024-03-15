@@ -22,9 +22,7 @@ export const listResources = async (req: SessionRequest, res: Response) => {
 
 
 export const getResource = async (req: SessionRequest, res: Response) => {
-  let resource = await Resource.findOne({
-    _id: req.params.id,
-  });
+  let resource = await Resource.findById(req.params.resourceId).lean();
 
   if (!resource) {
     return res.status(404).send("Resource not found");

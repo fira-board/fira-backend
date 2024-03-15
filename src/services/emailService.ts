@@ -11,7 +11,7 @@ const client = new EmailClient(process.env.Azure_COMM_SERVICE_CONNECTION_STRING!
 
 
 export const sendInvite = async (from: string, projectName: string, to: string) => {
-
+try {
     // Define your email message (same as in JavaScript example)
     const message = {
         senderAddress: "DoNotReply@firaboard.ai",
@@ -30,6 +30,10 @@ export const sendInvite = async (from: string, projectName: string, to: string) 
     const response = await poller.pollUntilDone();
 
     console.log("email invite", response);
+
+} catch (error) {
+    console.log("email invite", error);   
+}
 }
 
 

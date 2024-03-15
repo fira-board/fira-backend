@@ -8,15 +8,14 @@ import Project from "../models/project";
 import Resource from "../models/resource";
 
 export const suggestNewEpic = async (req: SessionRequest, res: Response) => {
-    const userId = req.session!.getUserId();
     const projectId = req.query.projectId;
     const resourceId = req.query.resourceId;
     const order = req.query.order;
     const model = req.model || '';
 
 
-    const project = await Project.findById({ _id: projectId, owner: userId })!;
-    const resource = await Resource.findById({ _id: resourceId, owner: userId });
+    const project = await Project.findById({ _id: projectId });
+    const resource = await Resource.findById({ _id: resourceId });
 
     if (project && resource) {
         const response = await generateEpicSugestions(project, Number(order), resource.title, model);
@@ -30,14 +29,13 @@ export const suggestNewEpic = async (req: SessionRequest, res: Response) => {
 }
 
 export const suggestNewTask = async (req: SessionRequest, res: Response) => {
-    const userId = req.session!.getUserId();
     const projectId = req.query.projectId;
     const epicId = req.query.epicId;
     const order = req.query.order;
     const model = req.model || '';
 
-    const project = await Project.findById({ _id: projectId, owner: userId })!;
-    const epic = await Epic.findById({ _id: epicId, owner: userId });
+    const project = await Project.findById({ _id: projectId });
+    const epic = await Epic.findById({ _id: epicId });
 
     if (project && epic) {
         res.send(await generateTaskSugestions(project, Number(order), epic.title, model));
