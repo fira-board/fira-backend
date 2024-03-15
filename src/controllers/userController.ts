@@ -39,7 +39,9 @@ export const getUserDetails = async (req: SessionRequest, res: Response) => {
         email: userInfo.emails,
         name: userData!.name,
         profilePicture: userData?.profilePicture,
-        timeJoineds: userInfo.timeJoined
+        timeJoineds: userInfo.timeJoined,
+        allowedTokens: userData!.allowedTokens,
+        consumedTokens: userData!.consumedTokens,
     });
 
 };
